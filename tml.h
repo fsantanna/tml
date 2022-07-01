@@ -1,5 +1,6 @@
 enum {
     TML_NONE = 0,
+    TML_FIRST,
     TML_TICK,
     TML_NEXT
 };

@@ -31,7 +31,7 @@ int main (void) {
 
 	while (1) {
         tml_evt evt = tml_wait();
-        printf(">>> %d\n", evt.id);
+        printf(">>> %d / %d\n", evt.id, evt.pay.tick);
 
         pico_output_clear();
 
