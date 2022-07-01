@@ -25,19 +25,21 @@ int main (void) {
 }
 
 #define CARDS 2
-Pico_2i cs[CARDS] = {
-    { -10, 0 },
-    {  10, 0 }
-};
-
-Pico_2i rp = { 0, 0 };
-Pico_2i rv = { 0, 0 };
+Pico_2i cs[CARDS];
+Pico_2i rp;
+Pico_2i rv;
 
 void cb1 (tml_evt evt) {
-    printf(">>> %d / %d\n", evt.id, evt.pay.tick);
+    //printf(">>> %d / %d\n", evt.id, evt.pay.tick);
     pico_output_clear();
 
     switch (evt.id) {
+        case TML_EVT_FIRST:
+            cs[0] = (Pico_2i) { -10, 0 };
+            cs[1] = (Pico_2i) {  10, 0 };
+            rp = (Pico_2i) { 0, 0 };
+            rv = (Pico_2i) { 0, 0 };
+            break;
         case TML_EVT_TICK:
             rp._1 += rv._1;
             rp._2 += rv._2;
@@ -91,6 +93,9 @@ int cb2 (tml_evt* evt) {
                 //SDL_RenderFillRect(ren, &r);
                 *evt = (tml_evt) { TML_EVT_KEY, {.i1=key} };
                 return TML_RET_EVT;
+            }
+            if (key==SDLK_ESCAPE) {
+                return TML_RET_TRAVEL;
             }
             break;
         }

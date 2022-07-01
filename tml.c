@@ -42,28 +42,29 @@ void tml_loop (int fps, void(*cb1)(tml_evt), int(*cb2)(tml_evt*)) {
             } else {
                 assert(SDL_HasEvents(SDL_FIRSTEVENT,SDL_LASTEVENT));
                 tml_evt evt;
-                if (cb2(&evt)) {
-                    assert(E.tot < EVT_MAX);
-                    E.queue[E.tot++] = (tml_tick_evt) { T.tick, evt };
+                switch (cb2(&evt)) {
+                    case TML_RET_EVT:
+                        assert(E.tot < EVT_MAX);
+                        E.queue[E.tot++] = (tml_tick_evt) { T.tick, evt };
+                        break;
+                    case TML_RET_TRAVEL: {
+                        uint32_t now = SDL_GetTicks();
+                        cb1((tml_evt) { TML_EVT_FIRST });
+                        int tick = 0;
+                        for (int i=0; i<E.tot; i++) {
+                            tml_tick_evt cur = E.queue[i];
+                            while (cur.tick > tick) {
+                                tick++;
+                                SDL_Delay(T.mpf);
+                                cb1((tml_evt) { TML_EVT_TICK, {.tick=T.tick} });
+                            }
+                            cb1(E.queue[i].evt);
+                        }
+                        T.nxt += (SDL_GetTicks() - now);
+                        break;
+                    }
                 }
             }
         }
     }
-}
-
-void tml_travel (int tick) {
-#if 0
-    tml_emit((tml_evt){ TML_EVT_FIRST });
-    int tick = 0;
-    for (int i=0; i<E.tot; i++) {
-        tml_tick_evt cur = E.queue[i];
-        if (cur.tick > tick) {
-            tick = cur.tick;
-            tml_emit((tml_evt) { TML_EVT_TICK, {.tick=T.tick} });
-        }
-        tml_emit(E.queue[i].evt);
-    }
-    tml_emit(
-    assert(0);
-#endif
 }
