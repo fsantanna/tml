@@ -15,13 +15,14 @@ enum {
 
 void cb_sim (tml_evt);
 int  cb_out (tml_evt* evt);
+int  cb_trv (void);
 
 int main (void) {
     pico_open();
     pico_output_set_auto(0);
     pico_output_set_color_clear(0xFF,0xFF,0xFF);
 
-    tml_loop(20, cb_sim, cb_out);
+    tml_loop(20, cb_sim, cb_out, cb_trv);
 }
 
 #define CARDS 2
@@ -71,7 +72,7 @@ void cb_sim (tml_evt evt) {
 int cb_out (tml_evt* evt) {
     SDL_Event inp;
     //int has =
-    pico_input_event_poll(SDL_ANY);
+    pico_input_event_poll(&inp, SDL_ANY);
     //assert(has);
 
     static int drag_is = 0;
@@ -123,6 +124,27 @@ int cb_out (tml_evt* evt) {
                     drag_src = pt;
                     break;
                 }
+            }
+            break;
+        }
+    }
+    return TML_RET_NONE;
+}
+
+int cb_trv (void) {
+    SDL_Event inp;
+    //int has =
+    pico_input_event_poll(&inp, SDL_ANY);
+    //assert(has);
+
+    switch (inp.type) {
+        case SDL_QUIT:
+            exit(0);
+            break;
+        case SDL_KEYDOWN: {
+            int key = inp.key.keysym.sym;
+            if (key==SDLK_ESCAPE) {
+                return TML_RET_TRAVEL;
             }
             break;
         }

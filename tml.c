@@ -9,7 +9,7 @@ typedef struct {
     tml_evt evt;
 } tml_tick_evt;
 
-void tml_loop (int fps, void(*cb_sim)(tml_evt), int(*cb_out)(tml_evt*)) {
+void tml_loop (int fps, void(*cb_sim)(tml_evt), int(*cb_out)(tml_evt*), int(*cb_trv)(void)) {
     int mpf = 1000 / fps;
     assert(1000%fps == 0);
     struct {

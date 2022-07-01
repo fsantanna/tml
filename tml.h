@@ -27,4 +27,4 @@ typedef struct {
     } pay;
 } tml_evt;
 
-void tml_loop (int fps, void(*cb_sim)(tml_evt), int(*cb_out)(tml_evt*));
+void tml_loop (int fps, void(*cb_sim)(tml_evt), int(*cb_out)(tml_evt*), int(*cb_trv)(void));
