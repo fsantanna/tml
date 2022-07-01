@@ -9,57 +9,61 @@ typedef struct {
     tml_evt evt;
 } tml_tick_evt;
 
-struct {
+void tml_loop (int fps, void(*cb1)(tml_evt), int(*cb2)(tml_evt*)) {
+    int mpf = 1000 / fps;
+    assert(1000%fps == 0);
     struct {
         uint32_t nxt;
         int      mpf;
         int      tick;
-    } t;
+    } T = { SDL_GetTicks()+mpf, mpf, 0 };
+
     struct {
-        int max;
+        int tot;
         int nxt;
         tml_tick_evt queue[EVT_MAX];
-    } e;
-} G = { {-1, -1, -1}, {0, 0, {}} };
+    } E = { 0, 0, {} };
 
-void tml_open (int fps) {
-    assert(1000%fps == 0);
-    G.t.mpf = 1000 / fps;
-    G.t.nxt = SDL_GetTicks();
-}
+    cb1((tml_evt) { TML_FIRST });
 
-void tml_close (void) {
-}
-
-tml_evt tml_wait (void) {
-    if (G.t.tick == -1) {
-        G.t.tick = 0;
-        return (tml_evt) { TML_FIRST };
-    } else if (G.e.nxt < G.e.max) {
-        return G.e.queue[G.e.nxt++].evt;
-    } else {
-        uint32_t now = SDL_GetTicks();
-        if (now < G.t.nxt) {
-            SDL_WaitEventTimeout(NULL, G.t.nxt-now);
-            now = SDL_GetTicks();
-        }
-        if (now >= G.t.nxt) {
-            G.t.tick++;
-            G.t.nxt += G.t.mpf;
-            return (tml_evt) { TML_TICK, {.tick=G.t.tick} };
+    while (1) {
+        if (E.nxt < E.tot) {
+            cb1(E.queue[E.nxt++].evt);
         } else {
-            assert(SDL_HasEvents(SDL_FIRSTEVENT,SDL_LASTEVENT));
-            return (tml_evt) { TML_NONE };
+            uint32_t now = SDL_GetTicks();
+            if (now < T.nxt) {
+                SDL_WaitEventTimeout(NULL, T.nxt-now);
+                now = SDL_GetTicks();
+            }
+            if (now >= T.nxt) {
+                T.tick++;
+                T.nxt += T.mpf;
+                cb1((tml_evt) { TML_TICK, {.tick=T.tick} });
+            } else {
+                assert(SDL_HasEvents(SDL_FIRSTEVENT,SDL_LASTEVENT));
+                tml_evt evt;
+                if (cb2(&evt)) {
+                    assert(E.tot < EVT_MAX);
+                    E.queue[E.tot++] = (tml_tick_evt) { T.tick, evt };
+                }
+            }
         }
     }
-    assert(0);
-}
-
-void tml_emit (tml_evt evt) {
-    assert(G.e.max < EVT_MAX);
-    G.e.queue[G.e.max++] = (tml_tick_evt) { G.t.tick, evt };
 }
 
 void tml_travel (int tick) {
+#if 0
+    tml_emit((tml_evt){ TML_FIRST });
+    int tick = 0;
+    for (int i=0; i<E.tot; i++) {
+        tml_tick_evt cur = E.queue[i];
+        if (cur.tick > tick) {
+            tick = cur.tick;
+            tml_emit((tml_evt) { TML_TICK, {.tick=T.tick} });
+        }
+        tml_emit(E.queue[i].evt);
+    }
+    tml_emit(
     assert(0);
+#endif
 }

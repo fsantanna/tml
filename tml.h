@@ -1,6 +1,5 @@
 enum {
-    TML_NONE = 0,
-    TML_FIRST,
+    TML_FIRST = 0,
     TML_TICK,
     TML_NEXT
 };
@@ -22,8 +21,5 @@ typedef struct {
     } pay;
 } tml_evt;
 
-void    tml_open   (int fps);
-void    tml_close  (void);
-tml_evt tml_wait   (void);
-void    tml_emit   (tml_evt evt);
-void    tml_travel (int tick);
+void tml_loop   (int fps, void(*cb1)(tml_evt), int(*cb2)(tml_evt*));
+void tml_travel (int tick);
