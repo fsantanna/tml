@@ -26,30 +26,14 @@ int main (void) {
     Pico_2i rp = { 0, 0 };
     Pico_2i rv = { 0, 0 };
 
-    pico_output((Pico_Output) {
-        .tag = PICO_OUTPUT_SET,
-        .Set = {
-            .tag = PICO_OUTPUT_SET_AUTO,
-            .Auto = 0
-        }
-    });
-
-    pico_output((Pico_Output) {
-        .tag = PICO_OUTPUT_SET,
-        .Set = {
-            .tag = PICO_OUTPUT_SET_COLOR,
-            .Color = {
-                .tag = PICO_OUTPUT_SET_COLOR_CLEAR,
-                .Clear = {0xFF,0xFF,0xFF,0xFF}
-            }
-        }
-    });
+    pico_output_set_auto(0);
+    pico_output_set_color_clear(0xFF,0xFF,0xFF);
 
 	while (1) {
         tml_evt evt = tml_wait();
         printf(">>> %d\n", evt.id);
 
-        pico_output((Pico_Output) { .tag=PICO_OUTPUT_CLEAR });
+        pico_output_clear();
 
         switch (evt.id) {
             case TML_TICK:
@@ -72,13 +56,7 @@ int main (void) {
                 SDL_Event inp;
 
                 //int has =
-                pico_input(&inp, (Pico_Input){
-                    .tag = PICO_INPUT_EVENT,
-                    .Event = {
-                        .tag = PICO_INPUT_EVENT_POLL,
-                        .type = SDL_ANY
-                    }
-                });
+                pico_input_event_poll(SDL_ANY);
                 //assert(has);
 
 // - pico auto
@@ -137,36 +115,14 @@ int main (void) {
             }
         }
 
-        pico_output((Pico_Output) {
-            .tag = PICO_OUTPUT_SET,
-            .Set = {
-                .tag = PICO_OUTPUT_SET_COLOR,
-                .Color = {
-                    .tag = PICO_OUTPUT_SET_COLOR_DRAW,
-                    .Draw = {0xFF,0x00,0x00,0xFF}
-                }
-            }
-        });
+        pico_output_set_color_draw(0xFF,0x00,0x00);
 
         for (int i=0; i<CARDS; i++) {
-            pico_output((Pico_Output) {
-                .tag = PICO_OUTPUT_DRAW,
-                .Draw = {
-                    .tag = PICO_OUTPUT_DRAW_RECT,
-                    .Rect = { cs[i], {5,9} }
-                }
-            });
+            pico_output_draw_rect(cs[i], ((Pico_2i){5,9}));
         }
 
-        pico_output((Pico_Output) {
-            .tag = PICO_OUTPUT_DRAW,
-            .Draw = {
-                .tag = PICO_OUTPUT_DRAW_PIXEL,
-                .Pixel = rp
-            }
-        });
-
-        pico_output((Pico_Output) { .tag=PICO_OUTPUT_PRESENT });
+        pico_output_draw_pixel(rp);
+        pico_output_present();
 	}
 
 	tml_close();
