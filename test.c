@@ -13,15 +13,15 @@ enum {
     TML_EVT_DRAG
 };
 
-void cb1 (tml_evt);
-int  cb2 (tml_evt* evt);
+void cb_sim (tml_evt);
+int  cb_out (tml_evt* evt);
 
 int main (void) {
     pico_open();
     pico_output_set_auto(0);
     pico_output_set_color_clear(0xFF,0xFF,0xFF);
 
-    tml_loop(20, cb1, cb2);
+    tml_loop(20, cb_sim, cb_out);
 }
 
 #define CARDS 2
@@ -29,7 +29,7 @@ Pico_2i cs[CARDS];
 Pico_2i rp;
 Pico_2i rv;
 
-void cb1 (tml_evt evt) {
+void cb_sim (tml_evt evt) {
     //printf(">>> %d / %d\n", evt.id, evt.pay.tick);
     pico_output_clear();
 
@@ -68,7 +68,7 @@ void cb1 (tml_evt evt) {
     pico_output_present();
 }
 
-int cb2 (tml_evt* evt) {
+int cb_out (tml_evt* evt) {
     SDL_Event inp;
     //int has =
     pico_input_event_poll(SDL_ANY);
