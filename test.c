@@ -104,7 +104,7 @@ int cb_evt (tml_evt* evt) {
                 return TML_RET_EVT;
             }
             if (key==SDLK_ESCAPE) {
-                return TML_RET_TRAVEL;
+                return TML_RET_TRV;
             }
             break;
         }

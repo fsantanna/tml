@@ -1,7 +1,7 @@
 enum {
     TML_RET_NONE = 0,
     TML_RET_EVT,
-    TML_RET_TRAVEL
+    TML_RET_TRV
 };
 
 enum {

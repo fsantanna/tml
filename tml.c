@@ -47,7 +47,7 @@ void tml_loop (int fps, void(*cb_sim)(tml_evt), int(*cb_evt)(tml_evt*), int(*cb_
                     assert(E.tot < EVT_MAX);
                     E.queue[E.tot++] = (tml_tick_evt) { T.tick, evt };
                     break;
-                case TML_RET_TRAVEL: {
+                case TML_RET_TRV: {
                     uint32_t now = SDL_GetTicks();
                     cb_sim((tml_evt) { TML_EVT_FIRST });
                     int tick = 0;
