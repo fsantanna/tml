@@ -9,7 +9,7 @@ typedef struct {
     tml_evt evt;
 } tml_tick_evt;
 
-void tml_loop (int fps, void(*cb_sim)(tml_evt), int(*cb_out)(tml_evt*), int(*cb_trv)(void)) {
+void tml_loop (int fps, void(*cb_sim)(tml_evt), int(*cb_evt)(tml_evt*), int(*cb_trv)(tml_trv*)) {
     int mpf = 1000 / fps;
     assert(1000%fps == 0);
     struct {
@@ -39,30 +39,29 @@ void tml_loop (int fps, void(*cb_sim)(tml_evt), int(*cb_out)(tml_evt*), int(*cb_
                 T.tick++;
                 T.nxt += T.mpf;
                 cb_sim((tml_evt) { TML_EVT_TICK, {.tick=T.tick} });
-            } else {
-                assert(SDL_HasEvents(SDL_FIRSTEVENT,SDL_LASTEVENT));
-                tml_evt evt;
-                switch (cb_out(&evt)) {
-                    case TML_RET_EVT:
-                        assert(E.tot < EVT_MAX);
-                        E.queue[E.tot++] = (tml_tick_evt) { T.tick, evt };
-                        break;
-                    case TML_RET_TRAVEL: {
-                        uint32_t now = SDL_GetTicks();
-                        cb_sim((tml_evt) { TML_EVT_FIRST });
-                        int tick = 0;
-                        for (int i=0; i<E.tot; i++) {
-                            tml_tick_evt cur = E.queue[i];
-                            while (cur.tick > tick) {
-                                tick++;
-                                SDL_Delay(T.mpf);
-                                cb_sim((tml_evt) { TML_EVT_TICK, {.tick=T.tick} });
-                            }
-                            cb_sim(E.queue[i].evt);
+            }
+
+            tml_evt evt;
+            switch (cb_evt(&evt)) {
+                case TML_RET_EVT:
+                    assert(E.tot < EVT_MAX);
+                    E.queue[E.tot++] = (tml_tick_evt) { T.tick, evt };
+                    break;
+                case TML_RET_TRAVEL: {
+                    uint32_t now = SDL_GetTicks();
+                    cb_sim((tml_evt) { TML_EVT_FIRST });
+                    int tick = 0;
+                    for (int i=0; i<E.tot; i++) {
+                        tml_tick_evt cur = E.queue[i];
+                        while (cur.tick > tick) {
+                            tick++;
+                            SDL_Delay(T.mpf);
+                            cb_sim((tml_evt) { TML_EVT_TICK, {.tick=T.tick} });
                         }
-                        T.nxt += (SDL_GetTicks() - now);
-                        break;
+                        cb_sim(E.queue[i].evt);
                     }
+                    T.nxt += (SDL_GetTicks() - now);
+                    break;
                 }
             }
         }

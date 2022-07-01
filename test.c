@@ -14,15 +14,15 @@ enum {
 };
 
 void cb_sim (tml_evt);
-int  cb_out (tml_evt* evt);
-int  cb_trv (void);
+int  cb_evt (tml_evt* evt);
+int  cb_trv (tml_trv* trv);
 
 int main (void) {
     pico_open();
     pico_output_set_auto(0);
-    pico_output_set_color_clear(0xFF,0xFF,0xFF);
+    pico_output_set_color_clear_rgb(0xFF,0xFF,0xFF);
 
-    tml_loop(20, cb_sim, cb_out, cb_trv);
+    tml_loop(20, cb_sim, cb_evt, cb_trv);
 }
 
 #define CARDS 2
@@ -59,7 +59,7 @@ void cb_sim (tml_evt evt) {
             break;
     }
 
-    pico_output_set_color_draw(0xFF,0x00,0x00);
+    pico_output_set_color_draw_rgb(0xFF,0x00,0x00);
 
     for (int i=0; i<CARDS; i++) {
         pico_output_draw_rect(cs[i], ((Pico_2i){5,9}));
@@ -69,7 +69,15 @@ void cb_sim (tml_evt evt) {
     pico_output_present();
 }
 
-int cb_out (tml_evt* evt) {
+int cb_evt (tml_evt* evt) {
+    pico_output_set_color_draw_rgb(0xFF,0x00,0x00);
+    pico_output_draw_pixel_xy(20,-20);
+    pico_output_present();
+
+    if (evt == NULL) {
+        return TML_RET_NONE;
+    }
+
     SDL_Event inp;
     //int has =
     pico_input_event_poll(&inp, SDL_ANY);
@@ -131,11 +139,15 @@ int cb_out (tml_evt* evt) {
     return TML_RET_NONE;
 }
 
-int cb_trv (void) {
+int cb_trv (tml_trv* trv) {
     SDL_Event inp;
     //int has =
     pico_input_event_poll(&inp, SDL_ANY);
     //assert(has);
+
+    pico_output_set_color_draw_rgb(0x00,0xFF,0x00);
+    pico_output_draw_pixel_xy(20,-20);
+    pico_output_present();
 
     switch (inp.type) {
         case SDL_QUIT:
@@ -144,7 +156,7 @@ int cb_trv (void) {
         case SDL_KEYDOWN: {
             int key = inp.key.keysym.sym;
             if (key==SDLK_ESCAPE) {
-                return TML_RET_TRAVEL;
+                return TML_RET_EVT;
             }
             break;
         }
