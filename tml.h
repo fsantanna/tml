@@ -1,4 +1,10 @@
 enum {
+    TML_RET_NONE = 0,
+    TML_RET_EVT,
+    TML_RET_TRAVEL
+};
+
+enum {
     TML_EVT_FIRST = 0,
     TML_EVT_TICK,
     TML_EVT_NEXT

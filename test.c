@@ -90,7 +90,7 @@ int cb2 (tml_evt* evt) {
                 //SDL_SetRenderDrawColor(ren, 0x77,0x77,0x77,0x77);
                 //SDL_RenderFillRect(ren, &r);
                 *evt = (tml_evt) { TML_EVT_KEY, {.i1=key} };
-                return 1;
+                return TML_RET_EVT;
             }
             break;
         }
@@ -105,7 +105,7 @@ int cb2 (tml_evt* evt) {
                     }}
                 };
                 drag_is = 0;
-                return 1;
+                return TML_RET_EVT;
             }
             break;
         case SDL_MOUSEBUTTONDOWN: {
@@ -122,5 +122,5 @@ int cb2 (tml_evt* evt) {
             break;
         }
     }
-    return 0;
+    return TML_RET_NONE;
 }
