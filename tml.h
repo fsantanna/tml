@@ -8,6 +8,7 @@ typedef struct {
     uint8_t id;
     union {
         int tick;
+        int i1;
         struct {
             int _1;
             int _2;

@@ -9,7 +9,8 @@ exit
 #include "tml.h"
 
 enum {
-    TML_DRAG = TML_NEXT
+    TML_KEY = TML_NEXT,
+    TML_DRAG
 };
 
 int main (void) {
@@ -21,6 +22,9 @@ int main (void) {
         { -10, 0 },
         {  10, 0 }
     };
+
+    Pico_2i rp = { 0, 0 };
+    Pico_2i rv = { 0, 0 };
 
     pico_output((Pico_Output) {
         .tag = PICO_OUTPUT_SET,
@@ -39,42 +43,38 @@ int main (void) {
 
         pico_output((Pico_Output) { .tag=PICO_OUTPUT_CLEAR });
 
-        if (evt.id == TML_DRAG) {
-            cs[evt.pay.i3._1] = (Pico_2i) { evt.pay.i3._2, evt.pay.i3._3 };
-        }
-
-        pico_output((Pico_Output) {
-            .tag = PICO_OUTPUT_SET,
-            .Set = {
-                .tag = PICO_OUTPUT_SET_COLOR,
-                .Color = {
-                    .tag = PICO_OUTPUT_SET_COLOR_DRAW,
-                    .Draw = {0xFF,0x00,0x00,0xFF}
+        switch (evt.id) {
+            case TML_TICK:
+                rp._1 += rv._1;
+                rp._2 += rv._2;
+                break;
+            case TML_KEY:
+                switch (evt.pay.i1) {
+                    case SDLK_LEFT:  { rv._1=-1; rv._2=0; break; }
+                    case SDLK_RIGHT: { rv._1= 1; rv._2=0; break; }
+                    case SDLK_UP:    { rv._2= 1; rv._1=0; break; }
+                    case SDLK_DOWN:  { rv._2=-1; rv._1=0; break; }
+                    case SDLK_SPACE: { rv._1= 0; rv._2=0; break; }
                 }
-            }
-        });
+                break;
+            case TML_DRAG:
+                cs[evt.pay.i3._1] = (Pico_2i) { evt.pay.i3._2, evt.pay.i3._3 };
+                break;
+            case TML_NONE: {
+                SDL_Event inp;
 
-        for (int i=0; i<CARDS; i++) {
-            pico_output((Pico_Output) {
-                .tag = PICO_OUTPUT_DRAW,
-                .Draw = {
-                    .tag = PICO_OUTPUT_DRAW_RECT,
-                    .Rect = { cs[i], {5,9} }
-                }
-            });
-        }
-
-        {
-            SDL_Event inp;
-            while (1) {
-                int has = pico_input(&inp, (Pico_Input){
+                //int has =
+                pico_input(&inp, (Pico_Input){
                     .tag = PICO_INPUT_EVENT,
                     .Event = {
                         .tag = PICO_INPUT_EVENT_POLL,
                         .type = SDL_ANY
                     }
                 });
-                if (!has) break;
+                //assert(has);
+
+// - pico auto
+// - moving rect
 
                 static int drag_is = 0;
                 static int drag_i;
@@ -83,6 +83,20 @@ int main (void) {
                 switch (inp.type) {
                     case SDL_QUIT:
                         exit(0);
+                        break;
+                    case SDL_KEYDOWN: {
+                        int key = inp.key.keysym.sym;
+                        if (key==SDLK_LEFT || key==SDLK_RIGHT ||
+                            key==SDLK_UP   || key==SDLK_DOWN  ||
+                            key==SDLK_SPACE
+                        ) {
+                            //SDL_Rect r = { 190, 190, 20, 20 };
+                            //SDL_SetRenderDrawColor(ren, 0x77,0x77,0x77,0x77);
+                            //SDL_RenderFillRect(ren, &r);
+                            tml_emit((tml_evt) { TML_KEY, {.i1=key} });
+                        }
+                        break;
+                    }
                     case SDL_MOUSEBUTTONUP:
                         if (drag_is) {
                             tml_emit((tml_evt) {
@@ -110,8 +124,39 @@ int main (void) {
                         break;
                     }
                 }
+
+                break;
             }
         }
+
+        pico_output((Pico_Output) {
+            .tag = PICO_OUTPUT_SET,
+            .Set = {
+                .tag = PICO_OUTPUT_SET_COLOR,
+                .Color = {
+                    .tag = PICO_OUTPUT_SET_COLOR_DRAW,
+                    .Draw = {0xFF,0x00,0x00,0xFF}
+                }
+            }
+        });
+
+        for (int i=0; i<CARDS; i++) {
+            pico_output((Pico_Output) {
+                .tag = PICO_OUTPUT_DRAW,
+                .Draw = {
+                    .tag = PICO_OUTPUT_DRAW_RECT,
+                    .Rect = { cs[i], {5,9} }
+                }
+            });
+        }
+
+        pico_output((Pico_Output) {
+            .tag = PICO_OUTPUT_DRAW,
+            .Draw = {
+                .tag = PICO_OUTPUT_DRAW_PIXEL,
+                .Pixel = rp
+            }
+        });
 	}
 
 	tml_close();

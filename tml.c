@@ -34,6 +34,7 @@ tml_evt tml_wait (void) {
             G.nxt += G.mpf;
             return (tml_evt) { TML_TICK, {.tick=G.tick} };
         } else {
+            assert(SDL_HasEvents(SDL_FIRSTEVENT,SDL_LASTEVENT));
             return (tml_evt) { TML_NONE };
         }
     }
