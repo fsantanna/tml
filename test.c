@@ -29,6 +29,14 @@ int main (void) {
     pico_output((Pico_Output) {
         .tag = PICO_OUTPUT_SET,
         .Set = {
+            .tag = PICO_OUTPUT_SET_AUTO,
+            .Auto = 0
+        }
+    });
+
+    pico_output((Pico_Output) {
+        .tag = PICO_OUTPUT_SET,
+        .Set = {
             .tag = PICO_OUTPUT_SET_COLOR,
             .Color = {
                 .tag = PICO_OUTPUT_SET_COLOR_CLEAR,
@@ -157,6 +165,8 @@ int main (void) {
                 .Pixel = rp
             }
         });
+
+        pico_output((Pico_Output) { .tag=PICO_OUTPUT_PRESENT });
 	}
 
 	tml_close();
