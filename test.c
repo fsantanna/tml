@@ -9,8 +9,8 @@ exit
 #include "tml.h"
 
 enum {
-    TML_KEY = TML_NEXT,
-    TML_DRAG
+    TML_EVT_KEY = TML_EVT_NEXT,
+    TML_EVT_DRAG
 };
 
 void cb1 (tml_evt);
@@ -38,11 +38,11 @@ void cb1 (tml_evt evt) {
     pico_output_clear();
 
     switch (evt.id) {
-        case TML_TICK:
+        case TML_EVT_TICK:
             rp._1 += rv._1;
             rp._2 += rv._2;
             break;
-        case TML_KEY:
+        case TML_EVT_KEY:
             switch (evt.pay.i1) {
                 case SDLK_LEFT:  { rv._1=-1; rv._2=0; break; }
                 case SDLK_RIGHT: { rv._1= 1; rv._2=0; break; }
@@ -51,7 +51,7 @@ void cb1 (tml_evt evt) {
                 case SDLK_SPACE: { rv._1= 0; rv._2=0; break; }
             }
             break;
-        case TML_DRAG:
+        case TML_EVT_DRAG:
             cs[evt.pay.i3._1] = (Pico_2i) { evt.pay.i3._2, evt.pay.i3._3 };
             break;
     }
@@ -89,7 +89,7 @@ int cb2 (tml_evt* evt) {
                 //SDL_Rect r = { 190, 190, 20, 20 };
                 //SDL_SetRenderDrawColor(ren, 0x77,0x77,0x77,0x77);
                 //SDL_RenderFillRect(ren, &r);
-                *evt = (tml_evt) { TML_KEY, {.i1=key} };
+                *evt = (tml_evt) { TML_EVT_KEY, {.i1=key} };
                 return 1;
             }
             break;
@@ -97,7 +97,7 @@ int cb2 (tml_evt* evt) {
         case SDL_MOUSEBUTTONUP:
             if (drag_is) {
                 *evt = (tml_evt) {
-                    TML_DRAG,
+                    TML_EVT_DRAG,
                     { .i3 = {
                         drag_i,
                         cs[drag_i]._1 + (inp.button.x-drag_src._1),

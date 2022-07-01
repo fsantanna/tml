@@ -1,7 +1,7 @@
 enum {
-    TML_FIRST = 0,
-    TML_TICK,
-    TML_NEXT
+    TML_EVT_FIRST = 0,
+    TML_EVT_TICK,
+    TML_EVT_NEXT
 };
 
 typedef struct {

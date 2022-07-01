@@ -24,7 +24,7 @@ void tml_loop (int fps, void(*cb1)(tml_evt), int(*cb2)(tml_evt*)) {
         tml_tick_evt queue[EVT_MAX];
     } E = { 0, 0, {} };
 
-    cb1((tml_evt) { TML_FIRST });
+    cb1((tml_evt) { TML_EVT_FIRST });
 
     while (1) {
         if (E.nxt < E.tot) {
@@ -38,7 +38,7 @@ void tml_loop (int fps, void(*cb1)(tml_evt), int(*cb2)(tml_evt*)) {
             if (now >= T.nxt) {
                 T.tick++;
                 T.nxt += T.mpf;
-                cb1((tml_evt) { TML_TICK, {.tick=T.tick} });
+                cb1((tml_evt) { TML_EVT_TICK, {.tick=T.tick} });
             } else {
                 assert(SDL_HasEvents(SDL_FIRSTEVENT,SDL_LASTEVENT));
                 tml_evt evt;
@@ -53,13 +53,13 @@ void tml_loop (int fps, void(*cb1)(tml_evt), int(*cb2)(tml_evt*)) {
 
 void tml_travel (int tick) {
 #if 0
-    tml_emit((tml_evt){ TML_FIRST });
+    tml_emit((tml_evt){ TML_EVT_FIRST });
     int tick = 0;
     for (int i=0; i<E.tot; i++) {
         tml_tick_evt cur = E.queue[i];
         if (cur.tick > tick) {
             tick = cur.tick;
-            tml_emit((tml_evt) { TML_TICK, {.tick=T.tick} });
+            tml_emit((tml_evt) { TML_EVT_TICK, {.tick=T.tick} });
         }
         tml_emit(E.queue[i].evt);
     }
