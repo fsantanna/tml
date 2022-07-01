@@ -2,37 +2,43 @@
 #include <assert.h>
 #include "tml.h"
 
+#define EVT_MAX 10000
+
 struct {
-    uint32_t nxt;
-    int      mpf;
-    int      tick;
-    int      n;
-    tml_evt  queue[1];
-} G = { -1, -1, -1, 0, {} };
+    struct {
+        uint32_t nxt;
+        int      mpf;
+        int      tick;
+    } t;
+    struct {
+        int      max;
+        int      nxt;
+        tml_evt  queue[EVT_MAX];
+    } e;
+} G = { {-1, -1, -1}, {0, 0, {}} };
 
 void tml_open (int fps) {
     assert(1000%fps == 0);
-    G.mpf = 1000 / fps;
-    G.nxt = SDL_GetTicks();
+    G.t.mpf = 1000 / fps;
+    G.t.nxt = SDL_GetTicks();
 }
 
 void tml_close (void) {
 }
 
 tml_evt tml_wait (void) {
-    if (G.n > 0) {
-        assert(G.n == 1);
-        return G.queue[--G.n];
+    if (G.e.nxt < G.e.max) {
+        return G.e.queue[G.e.nxt++];
     } else {
         uint32_t now = SDL_GetTicks();
-        if (now < G.nxt) {
-            SDL_WaitEventTimeout(NULL, G.nxt-now);
+        if (now < G.t.nxt) {
+            SDL_WaitEventTimeout(NULL, G.t.nxt-now);
             now = SDL_GetTicks();
         }
-        if (now >= G.nxt) {
-            G.tick++;
-            G.nxt += G.mpf;
-            return (tml_evt) { TML_TICK, {.tick=G.tick} };
+        if (now >= G.t.nxt) {
+            G.t.tick++;
+            G.t.nxt += G.t.mpf;
+            return (tml_evt) { TML_TICK, {.tick=G.t.tick} };
         } else {
             assert(SDL_HasEvents(SDL_FIRSTEVENT,SDL_LASTEVENT));
             return (tml_evt) { TML_NONE };
@@ -42,8 +48,8 @@ tml_evt tml_wait (void) {
 }
 
 void tml_emit (tml_evt evt) {
-    assert(G.n == 0);
-    G.queue[G.n++] = evt;
+    assert(G.e.max < EVT_MAX);
+    G.e.queue[G.e.max++] = evt;
 }
 
 void tml_travel (int tick) {
