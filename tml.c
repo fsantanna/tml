@@ -63,10 +63,10 @@ _RET_TRV_: {
     uint32_t prv = SDL_GetTicks();
     uint32_t nxt = SDL_GetTicks();
     int tick = S.tick;
+    int tot  = Q.tot;
 
     void seek (int t) {
         assert(0<=t && t<=S.tick);
-        tick = t;
         int e = 0;
         for (int i=0; i<=t; i++) {
             if (i == 0) {
@@ -79,6 +79,8 @@ _RET_TRV_: {
                 e++;
             }
         }
+        tick = t;
+        tot  = e;
         //SDL_Delay(S.mpf);
         cb_eff();
     }
@@ -97,6 +99,8 @@ _RET_TRV_: {
         switch (cb_trv(&trv)) {
             case TML_RET_EVT:
                 S.nxt += (SDL_GetTicks() - prv);
+                S.tick = tick;
+                Q.tot  = tot;
                 goto _RET_EVT_;
                 break;
             case TML_RET_TRV:
@@ -106,12 +110,17 @@ _RET_TRV_: {
                             seek(tick-1);
                         }
                         break;
-                    case TML_TRV_FWD: {
+                    case TML_TRV_FWD:
                         if (tick < S.tick) {
                             seek(tick+1);
                         }
                         break;
-                    }
+                    case TML_TRV_FST:
+                        seek(0);
+                        break;
+                    case TML_TRV_LST:
+                        seek(S.tick);
+                        break;
                 }
         }
     }

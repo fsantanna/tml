@@ -12,7 +12,9 @@ enum {
 
 enum {
     TML_TRV_BAK = 0,
-    TML_TRV_FWD
+    TML_TRV_FWD,
+    TML_TRV_FST,
+    TML_TRV_LST
 };
 
 typedef struct {

@@ -185,6 +185,12 @@ int cb_trv (tml_trv* trv) {
             } else if (pico_isPointVsRect(pt, r3)) {
                 *trv = (tml_trv) { TML_TRV_FWD };
                 return TML_RET_TRV;
+            } else if (pico_isPointVsRect(pt, r4)) {
+                *trv = (tml_trv) { TML_TRV_FST };
+                return TML_RET_TRV;
+            } else if (pico_isPointVsRect(pt, r5)) {
+                *trv = (tml_trv) { TML_TRV_LST };
+                return TML_RET_TRV;
             }
         }
     }
