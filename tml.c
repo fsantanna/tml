@@ -63,6 +63,7 @@ _RET_TRV_: {
     uint32_t prv = SDL_GetTicks();
     uint32_t nxt = SDL_GetTicks();
     int tick = S.tick;
+
     while (1) {
         uint32_t now = SDL_GetTicks();
         if (now < nxt) {
@@ -90,14 +91,14 @@ _RET_TRV_: {
                                 if (t == 0) {
                                     cb_sim((tml_evt) { TML_EVT_FIRST });
                                 } else {
-                                    //SDL_Delay(S.mpf);
                                     cb_sim((tml_evt) { TML_EVT_TICK, {.tick=t} });
                                 }
-                                while (e<Q.tot && Q.buf[e].tick<t) {
+                                while (e<Q.tot && Q.buf[e].tick<=t) {
                                     cb_sim(Q.buf[e].evt);
                                     e++;
                                 }
                             }
+                            //SDL_Delay(S.mpf);
                             cb_eff();
                         }
                         break;
@@ -108,12 +109,14 @@ _RET_TRV_: {
                             tick++;
                             cb_sim((tml_evt) { TML_EVT_TICK, {.tick=tick} });
                             int e = 0;
+                            printf("tick = %d\n", tick);
                             while (e<Q.tot && Q.buf[e].tick<=tick) {
-                                e++;
                                 if (Q.buf[e].tick == tick) {
                                     cb_sim(Q.buf[e].evt);
                                 }
+                                e++;
                             }
+                            //SDL_Delay(S.mpf);
                             cb_eff();
                         }
                         break;
