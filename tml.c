@@ -79,23 +79,41 @@ _RET_TRV_: {
                 break;
             case TML_RET_TRV:
                 switch (trv.id) {
-                    case TML_TRV_BCK:
-                        puts("BACK");
-                        tick--;
-                        int e = 0;
-                        for (int t=0; t<tick; t++) {
-                            if (t == 0) {
-                                cb_sim((tml_evt) { TML_EVT_FIRST });
-                            } else {
-                                //SDL_Delay(S.mpf);
-                                cb_sim((tml_evt) { TML_EVT_TICK, {.tick=t} });
-                            }
-                            while (e<Q.tot && Q.buf[e].tick<t) {
-                                cb_sim(Q.buf[e].evt);
-                                e++;
+                    case TML_TRV_BAK: {
+                        if (tick > 0) {
+                            printf("BACK %d -> %d\n", tick, tick-1);
+                            tick--;
+                            int e = 0;
+                            for (int t=0; t<=tick; t++) {
+                                if (t == 0) {
+                                    cb_sim((tml_evt) { TML_EVT_FIRST });
+                                } else {
+                                    //SDL_Delay(S.mpf);
+                                    cb_sim((tml_evt) { TML_EVT_TICK, {.tick=t} });
+                                }
+                                while (e<Q.tot && Q.buf[e].tick<t) {
+                                    cb_sim(Q.buf[e].evt);
+                                    e++;
+                                }
                             }
                         }
                         break;
+                    }
+                    case TML_TRV_FWD: {
+                        if (tick < S.tick) {
+                            printf("FORWARD %d -> %d\n", tick, tick+1);
+                            tick++;
+                            cb_sim((tml_evt) { TML_EVT_TICK, {.tick=tick} });
+                            int e = 0;
+                            while (e<Q.tot && Q.buf[e].tick<=tick) {
+                                e++;
+                                if (Q.buf[e].tick == tick) {
+                                    cb_sim(Q.buf[e].evt);
+                                }
+                            }
+                        }
+                        break;
+                    }
                 }
         }
     }

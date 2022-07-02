@@ -181,7 +181,10 @@ int cb_trv (tml_trv* trv) {
         case SDL_MOUSEBUTTONDOWN: {
             Pico_2i pt = { inp.button.x, inp.button.y };
             if (pico_isPointVsRect(pt, r2)) {
-                *trv = (tml_trv) { TML_TRV_BCK };
+                *trv = (tml_trv) { TML_TRV_BAK };
+                return TML_RET_TRV;
+            } else if (pico_isPointVsRect(pt, r3)) {
+                *trv = (tml_trv) { TML_TRV_FWD };
                 return TML_RET_TRV;
             }
         }
