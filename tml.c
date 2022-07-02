@@ -77,29 +77,7 @@ _RET_TRV_: {
             nxt += S.mpf;
         }
 
-        static int new = -1;
-
-        if (new != -1) {
-            assert(0<=new && new<=S.tick);
-            int e = 0;
-            for (int i=0; i<=new; i++) {
-                if (i == 0) {
-                    cb_sim((tml_evt) { TML_EVT_FIRST });
-                } else {
-                    cb_sim((tml_evt) { TML_EVT_TICK, {.tick=i} });
-                }
-                while (e<Q.tot && Q.buf[e].tick<=i) {
-                    cb_sim(Q.buf[e].evt);
-                    e++;
-                }
-            }
-            tick = new;
-            tot  = e;
-            //SDL_Delay(S.mpf);
-            cb_eff();
-        }
-
-        new = -1;
+        int new;
         switch (cb_trv(S.tick, tick, &new)) {
             case TML_RET_NONE:
                 break;
@@ -110,6 +88,23 @@ _RET_TRV_: {
                 goto _RET_REC_;
                 break;
             case TML_RET_TRV: {
+                assert(0<=new && new<=S.tick);
+                int e = 0;
+                for (int i=0; i<=new; i++) {
+                    if (i == 0) {
+                        cb_sim((tml_evt) { TML_EVT_FIRST });
+                    } else {
+                        cb_sim((tml_evt) { TML_EVT_TICK, {.tick=i} });
+                    }
+                    while (e<Q.tot && Q.buf[e].tick<=i) {
+                        cb_sim(Q.buf[e].evt);
+                        e++;
+                    }
+                }
+                tick = new;
+                tot  = e;
+                //SDL_Delay(S.mpf);
+                cb_eff();
                 break;
             }
         }
