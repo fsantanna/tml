@@ -155,12 +155,16 @@ int cb_trv (int max, int cur, int* ret) {
     Pico_4i r3 = { 15,-50,10,10};
     Pico_4i r4 = {-30,-50,10,10};
     Pico_4i r5 = { 30,-50,10,10};
+    Pico_4i r6 = {-45,-50,10,10};
+    Pico_4i r7 = { 45,-50,10,10};
 
     pico_output_draw_rect_4i(r1);
     pico_output_draw_rect_4i(r2);
     pico_output_draw_rect_4i(r3);
     pico_output_draw_rect_4i(r4);
     pico_output_draw_rect_4i(r5);
+    pico_output_draw_rect_4i(r6);
+    pico_output_draw_rect_4i(r7);
     //pico_output_set_image_crop_xywh(20,40,40,40);
     //pico_output_set_image_size_wh(20,20);
     //pico_output_draw_image(((Pico_2i){0,-20}), "media.jpg");
@@ -189,12 +193,12 @@ int cb_trv (int max, int cur, int* ret) {
                     *ret = cur + 1;
                     return TML_RET_TRV;
                 }
-            } else if (pico_isPointVsRect(pt, r4)) {
+            } else if (pico_isPointVsRect(pt, r6)) {
                 if (cur != 0) {
                     *ret = 0;
                     return TML_RET_TRV;
                 }
-            } else if (pico_isPointVsRect(pt, r5)) {
+            } else if (pico_isPointVsRect(pt, r7)) {
                 if (cur != max) {
                     *ret = max;
                     return TML_RET_TRV;
