@@ -5,6 +5,8 @@ exit
 #endif
 
 #include <assert.h>
+#include <stdlib.h>
+#include <time.h>
 #include "pico.h"
 #include "tml.h"
 
@@ -18,11 +20,16 @@ void cb_eff (void);
 int  cb_rec (tml_evt* evt);
 int  cb_trv (int max, int cur, int* ret);
 
+unsigned int SEED;
+
 #define CARDS 2
 struct {
+    unsigned int seed;
     Pico_2i cs[CARDS];
-    Pico_2i rp;
-    Pico_2i rv;
+    struct {
+        Pico_2i pos;
+        Pico_2i vel;
+    } pxs[2];
 } G;
 
 int main (void) {
@@ -33,28 +40,37 @@ int main (void) {
     pico_output_set_color_clear_rgb(0xFF,0xFF,0xFF);
     pico_output_set_auto(0);
 
+    SEED = time(NULL);
     tml_loop(20, sizeof(G), &G, cb_sim, cb_eff, cb_rec, cb_trv);
 }
 
 void cb_sim (tml_evt evt) {
     switch (evt.id) {
         case TML_EVT_FIRST:
+            G.seed = SEED;
             G.cs[0] = (Pico_2i) { -10, 0 };
             G.cs[1] = (Pico_2i) {  10, 0 };
-            G.rp = (Pico_2i) { 0, 0 };
-            G.rv = (Pico_2i) { 0, 0 };
+            G.pxs[0].pos = (Pico_2i) { 0, 0 };
+            G.pxs[0].vel = (Pico_2i) { 0, 0 };
+            G.pxs[1].pos = (Pico_2i) { 0, 0 };
+            G.pxs[1].vel = (Pico_2i) { 0, 0 };
             break;
         case TML_EVT_TICK:
-            G.rp._1 += G.rv._1;
-            G.rp._2 += G.rv._2;
+            G.pxs[0].pos._1 += G.pxs[0].vel._1;
+            G.pxs[0].pos._2 += G.pxs[0].vel._2;
+
+            int r1 = rand_r(&G.seed) % 3 - 1;
+            int r2 = rand_r(&G.seed) % 3 - 1;
+            G.pxs[1].pos._1 += r1;
+            G.pxs[1].pos._2 += r2;
             break;
         case TML_EVT_KEY:
             switch (evt.pay.i1) {
-                case SDLK_LEFT:  { G.rv._1=-1; G.rv._2=0; break; }
-                case SDLK_RIGHT: { G.rv._1= 1; G.rv._2=0; break; }
-                case SDLK_UP:    { G.rv._2= 1; G.rv._1=0; break; }
-                case SDLK_DOWN:  { G.rv._2=-1; G.rv._1=0; break; }
-                case SDLK_SPACE: { G.rv._1= 0; G.rv._2=0; break; }
+                case SDLK_LEFT:  { G.pxs[0].vel._1=-1; G.pxs[0].vel._2=0; break; }
+                case SDLK_RIGHT: { G.pxs[0].vel._1= 1; G.pxs[0].vel._2=0; break; }
+                case SDLK_UP:    { G.pxs[0].vel._2= 1; G.pxs[0].vel._1=0; break; }
+                case SDLK_DOWN:  { G.pxs[0].vel._2=-1; G.pxs[0].vel._1=0; break; }
+                case SDLK_SPACE: { G.pxs[0].vel._1= 0; G.pxs[0].vel._2=0; break; }
             }
             break;
         case TML_EVT_DRAG:
@@ -69,7 +85,8 @@ void cb_eff (void) {
     for (int i=0; i<CARDS; i++) {
         pico_output_draw_rect(G.cs[i], ((Pico_2i){5,9}));
     }
-    pico_output_draw_pixel(G.rp);
+    pico_output_draw_pixel(G.pxs[0].pos);
+    pico_output_draw_pixel(G.pxs[1].pos);
     pico_output_present();
 }
 
@@ -77,10 +94,6 @@ int cb_rec (tml_evt* evt) {
     pico_output_set_color_draw_rgb(0xFF,0x00,0x00);
     pico_output_draw_pixel_xy(20,-20);
     pico_output_present();
-
-    if (evt == NULL) {
-        return TML_RET_NONE;
-    }
 
     SDL_Event inp;
     //int has =
