@@ -125,20 +125,4 @@ _RET_TRV_: {
         }
     }
 }
-
-#if 0
-                    cb_sim((tml_evt) { TML_EVT_FIRST });
-                    int tick = 0;
-                    for (int i=0; i<Q.tot; i++) {
-                        tml_tick_evt cur = Q.buf[i];
-                        while (cur.tick > tick) {
-                            tick++;
-                            SDL_Delay(S.mpf);
-                            cb_sim((tml_evt) { TML_EVT_TICK, {.tick=S.tick} });
-                        }
-                        cb_sim(Q.buf[i].evt);
-                    }
-                    break;
-                }
-#endif
 }
