@@ -16,7 +16,7 @@ enum {
 void cb_sim (tml_evt);
 void cb_eff (void);
 int  cb_evt (tml_evt* evt);
-int  cb_trv (tml_trv* trv);
+int  cb_trv (int max, int cur, int* ret);
 
 int main (void) {
     pico_open();
@@ -141,7 +141,7 @@ int cb_evt (tml_evt* evt) {
     return TML_RET_NONE;
 }
 
-int cb_trv (tml_trv* trv) {
+int cb_trv (int max, int cur, int* ret) {
     SDL_Event inp;
     //int has =
     pico_input_event_poll(&inp, SDL_ANY);
@@ -180,16 +180,25 @@ int cb_trv (tml_trv* trv) {
         case SDL_MOUSEBUTTONDOWN: {
             Pico_2i pt = { inp.button.x, inp.button.y };
             if (pico_isPointVsRect(pt, r2)) {
-                *trv = (tml_trv) { TML_TRV_BAK };
-                return TML_RET_TRV;
+                if (cur > 0) {
+                    *ret = cur - 1;
+                    return TML_RET_TRV;
+                }
             } else if (pico_isPointVsRect(pt, r3)) {
-                *trv = (tml_trv) { TML_TRV_FWD };
-                return TML_RET_TRV;
+                if (cur < max) {
+                    *ret = cur + 1;
+                    return TML_RET_TRV;
+                }
             } else if (pico_isPointVsRect(pt, r4)) {
-                *trv = (tml_trv) { TML_TRV_FST };
-                return TML_RET_TRV;
+                if (cur != 0) {
+                    *ret = 0;
+                    return TML_RET_TRV;
+                }
             } else if (pico_isPointVsRect(pt, r5)) {
-                *trv = (tml_trv) { TML_TRV_LST };
+                if (cur != max) {
+                    *ret = max;
+                    return TML_RET_TRV;
+                }
                 return TML_RET_TRV;
             }
         }

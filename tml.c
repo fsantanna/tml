@@ -9,7 +9,7 @@ typedef struct {
     tml_evt evt;
 } tml_tick_evt;
 
-void tml_loop (int fps, void(*cb_sim)(tml_evt), void(*cb_eff)(void), int(*cb_evt)(tml_evt*), int(*cb_trv)(tml_trv*)) {
+void tml_loop (int fps, void(*cb_sim)(tml_evt), void(*cb_eff)(void), int(*cb_evt)(tml_evt*), int(*cb_trv)(int,int,int*)) {
     int mpf = 1000 / fps;
     assert(1000%fps == 0);
     struct {
@@ -65,26 +65,6 @@ _RET_TRV_: {
     int tick = S.tick;
     int tot  = Q.tot;
 
-    void seek (int t) {
-        assert(0<=t && t<=S.tick);
-        int e = 0;
-        for (int i=0; i<=t; i++) {
-            if (i == 0) {
-                cb_sim((tml_evt) { TML_EVT_FIRST });
-            } else {
-                cb_sim((tml_evt) { TML_EVT_TICK, {.tick=i} });
-            }
-            while (e<Q.tot && Q.buf[e].tick<=i) {
-                cb_sim(Q.buf[e].evt);
-                e++;
-            }
-        }
-        tick = t;
-        tot  = e;
-        //SDL_Delay(S.mpf);
-        cb_eff();
-    }
-
     while (1) {
         uint32_t now = SDL_GetTicks();
         if (now < nxt) {
@@ -95,33 +75,34 @@ _RET_TRV_: {
             nxt += S.mpf;
         }
 
-        tml_trv trv;
-        switch (cb_trv(&trv)) {
+        int new;
+        switch (cb_trv(S.tick, tick, &new)) {
             case TML_RET_EVT:
                 S.nxt += (SDL_GetTicks() - prv);
                 S.tick = tick;
                 Q.tot  = tot;
                 goto _RET_EVT_;
                 break;
-            case TML_RET_TRV:
-                switch (trv.id) {
-                    case TML_TRV_BAK:
-                        if (tick > 0) {
-                            seek(tick-1);
-                        }
-                        break;
-                    case TML_TRV_FWD:
-                        if (tick < S.tick) {
-                            seek(tick+1);
-                        }
-                        break;
-                    case TML_TRV_FST:
-                        seek(0);
-                        break;
-                    case TML_TRV_LST:
-                        seek(S.tick);
-                        break;
+            case TML_RET_TRV: {
+                assert(0<=new && new<=S.tick);
+                int e = 0;
+                for (int i=0; i<=new; i++) {
+                    if (i == 0) {
+                        cb_sim((tml_evt) { TML_EVT_FIRST });
+                    } else {
+                        cb_sim((tml_evt) { TML_EVT_TICK, {.tick=i} });
+                    }
+                    while (e<Q.tot && Q.buf[e].tick<=i) {
+                        cb_sim(Q.buf[e].evt);
+                        e++;
+                    }
                 }
+                tick = new;
+                tot  = e;
+                //SDL_Delay(S.mpf);
+                cb_eff();
+                break;
+            }
         }
     }
 }

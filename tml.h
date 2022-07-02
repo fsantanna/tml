@@ -10,13 +10,6 @@ enum {
     TML_EVT_NEXT
 };
 
-enum {
-    TML_TRV_BAK = 0,
-    TML_TRV_FWD,
-    TML_TRV_FST,
-    TML_TRV_LST
-};
-
 typedef struct {
     uint8_t id;
     union {
@@ -34,8 +27,4 @@ typedef struct {
     } pay;
 } tml_evt;
 
-typedef struct {
-    uint8_t id;
-} tml_trv;
-
-void tml_loop (int fps, void(*cb_sim)(tml_evt), void(*cb_eff)(void), int(*cb_evt)(tml_evt*), int(*cb_trv)(tml_trv*));
+void tml_loop (int fps, void(*cb_sim)(tml_evt), void(*cb_eff)(void), int(*cb_evt)(tml_evt*), int(*cb_trv)(int,int,int*));
