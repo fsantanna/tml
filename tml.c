@@ -64,6 +64,25 @@ _RET_TRV_: {
     uint32_t nxt = SDL_GetTicks();
     int tick = S.tick;
 
+    void seek (int t) {
+        assert(0<=t && t<=S.tick);
+        tick = t;
+        int e = 0;
+        for (int i=0; i<=t; i++) {
+            if (i == 0) {
+                cb_sim((tml_evt) { TML_EVT_FIRST });
+            } else {
+                cb_sim((tml_evt) { TML_EVT_TICK, {.tick=i} });
+            }
+            while (e<Q.tot && Q.buf[e].tick<=i) {
+                cb_sim(Q.buf[e].evt);
+                e++;
+            }
+        }
+        //SDL_Delay(S.mpf);
+        cb_eff();
+    }
+
     while (1) {
         uint32_t now = SDL_GetTicks();
         if (now < nxt) {
@@ -82,42 +101,14 @@ _RET_TRV_: {
                 break;
             case TML_RET_TRV:
                 switch (trv.id) {
-                    case TML_TRV_BAK: {
+                    case TML_TRV_BAK:
                         if (tick > 0) {
-                            printf("BACK %d -> %d\n", tick, tick-1);
-                            tick--;
-                            int e = 0;
-                            for (int t=0; t<=tick; t++) {
-                                if (t == 0) {
-                                    cb_sim((tml_evt) { TML_EVT_FIRST });
-                                } else {
-                                    cb_sim((tml_evt) { TML_EVT_TICK, {.tick=t} });
-                                }
-                                while (e<Q.tot && Q.buf[e].tick<=t) {
-                                    cb_sim(Q.buf[e].evt);
-                                    e++;
-                                }
-                            }
-                            //SDL_Delay(S.mpf);
-                            cb_eff();
+                            seek(tick-1);
                         }
                         break;
-                    }
                     case TML_TRV_FWD: {
                         if (tick < S.tick) {
-                            printf("FORWARD %d -> %d\n", tick, tick+1);
-                            tick++;
-                            cb_sim((tml_evt) { TML_EVT_TICK, {.tick=tick} });
-                            int e = 0;
-                            printf("tick = %d\n", tick);
-                            while (e<Q.tot && Q.buf[e].tick<=tick) {
-                                if (Q.buf[e].tick == tick) {
-                                    cb_sim(Q.buf[e].evt);
-                                }
-                                e++;
-                            }
-                            //SDL_Delay(S.mpf);
-                            cb_eff();
+                            seek(tick+1);
                         }
                         break;
                     }
