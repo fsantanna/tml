@@ -143,8 +143,7 @@ int cb_rec (tml_evt* evt) {
 
 int cb_trv (int max, int cur, int* ret) {
     SDL_Event inp;
-    //int has =
-    pico_input_event_poll(&inp, SDL_ANY);
+    int has = pico_input_event_poll(&inp, SDL_ANY);
     //assert(has);
 
     pico_output_set_color_draw_rgb(0x00,0xFF,0x00);
@@ -217,7 +216,7 @@ int cb_trv (int max, int cur, int* ret) {
             }
         }
     }
-    if (going != 0) {
+    if (!has && going!=0) {
         if (going==-1 && cur>0) {
             *ret = cur - 1;
             return TML_RET_TRV;
