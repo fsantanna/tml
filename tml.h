@@ -1,6 +1,6 @@
 enum {
     TML_RET_NONE = 0,
-    TML_RET_EVT,
+    TML_RET_REC,
     TML_RET_TRV
 };
 

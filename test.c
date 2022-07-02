@@ -103,7 +103,7 @@ int cb_rec (tml_evt* evt) {
                 //SDL_SetRenderDrawColor(ren, 0x77,0x77,0x77,0x77);
                 //SDL_RenderFillRect(ren, &r);
                 *evt = (tml_evt) { TML_EVT_KEY, {.i1=key} };
-                return TML_RET_EVT;
+                return TML_RET_REC;
             }
             if (key==SDLK_ESCAPE) {
                 return TML_RET_TRV;
@@ -121,7 +121,7 @@ int cb_rec (tml_evt* evt) {
                     }}
                 };
                 drag_is = 0;
-                return TML_RET_EVT;
+                return TML_RET_REC;
             }
             break;
         case SDL_MOUSEBUTTONDOWN: {
@@ -173,7 +173,7 @@ int cb_trv (int max, int cur, int* ret) {
         case SDL_KEYDOWN: {
             int key = inp.key.keysym.sym;
             if (key==SDLK_ESCAPE) {
-                return TML_RET_EVT;
+                return TML_RET_REC;
             }
             break;
         }

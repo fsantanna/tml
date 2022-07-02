@@ -26,7 +26,7 @@ void tml_loop (int fps, void(*cb_sim)(tml_evt), void(*cb_eff)(void), int(*cb_rec
 
     cb_sim((tml_evt) { TML_EVT_FIRST });
 
-_RET_EVT_: {
+_RET_REC_: {
 
     while (1) {
         if (Q.nxt < Q.tot) {
@@ -47,7 +47,9 @@ _RET_EVT_: {
 
             tml_evt evt;
             switch (cb_rec(&evt)) {
-                case TML_RET_EVT:
+                case TML_RET_NONE:
+                    break;
+                case TML_RET_REC:
                     assert(Q.tot < EVT_MAX);
                     Q.buf[Q.tot++] = (tml_tick_evt) { S.tick, evt };
                     break;
@@ -77,11 +79,13 @@ _RET_TRV_: {
 
         int new;
         switch (cb_trv(S.tick, tick, &new)) {
-            case TML_RET_EVT:
+            case TML_RET_NONE:
+                break;
+            case TML_RET_REC:
                 S.nxt += (SDL_GetTicks() - prv);
                 S.tick = tick;
                 Q.tot  = tot;
-                goto _RET_EVT_;
+                goto _RET_REC_;
                 break;
             case TML_RET_TRV: {
                 assert(0<=new && new<=S.tick);
