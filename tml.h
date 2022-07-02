@@ -10,6 +10,11 @@ enum {
     TML_EVT_NEXT
 };
 
+enum {
+    TML_TRV_BCK = 0,
+    TML_EVT_FWD
+};
+
 typedef struct {
     uint8_t id;
     union {

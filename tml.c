@@ -60,6 +60,7 @@ _RET_TRV_: {
 
     uint32_t prv = SDL_GetTicks();
     uint32_t nxt = SDL_GetTicks();
+    int tick = S.tick;
     while (1) {
         uint32_t now = SDL_GetTicks();
         if (now < nxt) {
@@ -77,7 +78,25 @@ _RET_TRV_: {
                 goto _RET_EVT_;
                 break;
             case TML_RET_TRV:
-                goto _RET_TRV_;
+                switch (trv.id) {
+                    case TML_TRV_BCK:
+                        puts("BACK");
+                        tick--;
+                        int e = 0;
+                        for (int t=0; t<tick; t++) {
+                            if (t == 0) {
+                                cb_sim((tml_evt) { TML_EVT_FIRST });
+                            } else {
+                                //SDL_Delay(S.mpf);
+                                cb_sim((tml_evt) { TML_EVT_TICK, {.tick=t} });
+                            }
+                            while (e<Q.tot && Q.buf[e].tick<t) {
+                                cb_sim(Q.buf[e].evt);
+                                e++;
+                            }
+                        }
+                        break;
+                }
         }
     }
 }

@@ -150,11 +150,18 @@ int cb_trv (tml_trv* trv) {
 
     pico_output_set_color_draw_rgb(0x00,0xFF,0x00);
     pico_output_draw_pixel_xy(20,-20);
-    pico_output_draw_rect_xywh(  0,-50,10,10);
-    pico_output_draw_rect_xywh(-15,-50,10,10);
-    pico_output_draw_rect_xywh( 15,-50,10,10);
-    pico_output_draw_rect_xywh(-30,-50,10,10);
-    pico_output_draw_rect_xywh( 30,-50,10,10);
+
+    Pico_4i r1 = {  0,-50,10,10};
+    Pico_4i r2 = {-15,-50,10,10};
+    Pico_4i r3 = { 15,-50,10,10};
+    Pico_4i r4 = {-30,-50,10,10};
+    Pico_4i r5 = { 30,-50,10,10};
+
+    pico_output_draw_rect_4i(r1);
+    pico_output_draw_rect_4i(r2);
+    pico_output_draw_rect_4i(r3);
+    pico_output_draw_rect_4i(r4);
+    pico_output_draw_rect_4i(r5);
     //pico_output_set_image_crop_xywh(20,40,40,40);
     //pico_output_set_image_size_wh(20,20);
     //pico_output_draw_image(((Pico_2i){0,-20}), "media.jpg");
@@ -170,6 +177,13 @@ int cb_trv (tml_trv* trv) {
                 return TML_RET_EVT;
             }
             break;
+        }
+        case SDL_MOUSEBUTTONDOWN: {
+            Pico_2i pt = { inp.button.x, inp.button.y };
+            if (pico_isPointVsRect(pt, r2)) {
+                *trv = (tml_trv) { TML_TRV_BCK };
+                return TML_RET_TRV;
+            }
         }
     }
     return TML_RET_NONE;
