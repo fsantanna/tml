@@ -169,6 +169,7 @@ int cb_trv (int max, int cur, int* ret) {
     //pico_output_draw_image(((Pico_2i){0,-20}), "media.jpg");
     pico_output_present();
 
+    static int _going = 0;
     static int going = 0;
 
     switch (inp.type) {
@@ -184,7 +185,14 @@ int cb_trv (int max, int cur, int* ret) {
         }
         case SDL_MOUSEBUTTONDOWN: {
             Pico_2i pt = { inp.button.x, inp.button.y };
-            if (pico_isPointVsRect(pt, r2)) {
+            if (pico_isPointVsRect(pt, r1)) {
+                if (going == 0) {
+                    going = _going;
+                } else {
+                    _going = going;
+                    going = 0;
+                }
+            } else if (pico_isPointVsRect(pt, r2)) {
                 going = 0;
                 if (cur > 0) {
                     *ret = cur - 1;
