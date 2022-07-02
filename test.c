@@ -170,6 +170,8 @@ int cb_trv (int max, int cur, int* ret) {
     //pico_output_draw_image(((Pico_2i){0,-20}), "media.jpg");
     pico_output_present();
 
+    static int going = 0;
+
     switch (inp.type) {
         case SDL_QUIT:
             exit(0);
@@ -184,27 +186,44 @@ int cb_trv (int max, int cur, int* ret) {
         case SDL_MOUSEBUTTONDOWN: {
             Pico_2i pt = { inp.button.x, inp.button.y };
             if (pico_isPointVsRect(pt, r2)) {
+                going = 0;
                 if (cur > 0) {
                     *ret = cur - 1;
                     return TML_RET_TRV;
                 }
             } else if (pico_isPointVsRect(pt, r3)) {
+                going = 0;
                 if (cur < max) {
                     *ret = cur + 1;
                     return TML_RET_TRV;
                 }
+            } else if (pico_isPointVsRect(pt, r4)) {
+                going = -1;
+            } else if (pico_isPointVsRect(pt, r5)) {
+                going = 1;
             } else if (pico_isPointVsRect(pt, r6)) {
+                going = 0;
                 if (cur != 0) {
                     *ret = 0;
                     return TML_RET_TRV;
                 }
             } else if (pico_isPointVsRect(pt, r7)) {
+                going = 0;
                 if (cur != max) {
                     *ret = max;
                     return TML_RET_TRV;
                 }
                 return TML_RET_TRV;
             }
+        }
+    }
+    if (going != 0) {
+        if (going==-1 && cur>0) {
+            *ret = cur - 1;
+            return TML_RET_TRV;
+        } else if (going==1 && cur<max) {
+            *ret = cur + 1;
+            return TML_RET_TRV;
         }
     }
     return TML_RET_NONE;
