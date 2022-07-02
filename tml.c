@@ -9,7 +9,7 @@ typedef struct {
     tml_evt evt;
 } tml_tick_evt;
 
-void tml_loop (int fps, void(*cb_sim)(tml_evt), int(*cb_evt)(tml_evt*), int(*cb_trv)(tml_trv*)) {
+void tml_loop (int fps, void(*cb_sim)(tml_evt), void(*cb_eff)(void), int(*cb_evt)(tml_evt*), int(*cb_trv)(tml_trv*)) {
     int mpf = 1000 / fps;
     assert(1000%fps == 0);
     struct {
@@ -31,6 +31,7 @@ _RET_EVT_: {
     while (1) {
         if (Q.nxt < Q.tot) {
             cb_sim(Q.buf[Q.nxt++].evt);
+            cb_eff();
         } else {
             uint32_t now = SDL_GetTicks();
             if (now < S.nxt) {
@@ -41,6 +42,7 @@ _RET_EVT_: {
                 S.tick++;
                 S.nxt += S.mpf;
                 cb_sim((tml_evt) { TML_EVT_TICK, {.tick=S.tick} });
+                cb_eff();
             }
 
             tml_evt evt;
@@ -96,6 +98,7 @@ _RET_TRV_: {
                                     e++;
                                 }
                             }
+                            cb_eff();
                         }
                         break;
                     }
@@ -111,6 +114,7 @@ _RET_TRV_: {
                                     cb_sim(Q.buf[e].evt);
                                 }
                             }
+                            cb_eff();
                         }
                         break;
                     }
