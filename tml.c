@@ -9,7 +9,7 @@ typedef struct {
     tml_evt evt;
 } tml_tick_evt;
 
-void tml_loop (int fps, void(*cb_sim)(tml_evt), void(*cb_eff)(void), int(*cb_evt)(tml_evt*), int(*cb_trv)(int,int,int*)) {
+void tml_loop (int fps, void(*cb_sim)(tml_evt), void(*cb_eff)(void), int(*cb_rec)(tml_evt*), int(*cb_trv)(int,int,int*)) {
     int mpf = 1000 / fps;
     assert(1000%fps == 0);
     struct {
@@ -46,7 +46,7 @@ _RET_EVT_: {
             }
 
             tml_evt evt;
-            switch (cb_evt(&evt)) {
+            switch (cb_rec(&evt)) {
                 case TML_RET_EVT:
                     assert(Q.tot < EVT_MAX);
                     Q.buf[Q.tot++] = (tml_tick_evt) { S.tick, evt };

@@ -15,7 +15,7 @@ enum {
 
 void cb_sim (tml_evt);
 void cb_eff (void);
-int  cb_evt (tml_evt* evt);
+int  cb_rec (tml_evt* evt);
 int  cb_trv (int max, int cur, int* ret);
 
 int main (void) {
@@ -26,7 +26,7 @@ int main (void) {
     pico_output_set_color_clear_rgb(0xFF,0xFF,0xFF);
     pico_output_set_auto(0);
 
-    tml_loop(20, cb_sim, cb_eff, cb_evt, cb_trv);
+    tml_loop(20, cb_sim, cb_eff, cb_rec, cb_trv);
 }
 
 #define CARDS 2
@@ -71,7 +71,7 @@ void cb_eff (void) {
     pico_output_present();
 }
 
-int cb_evt (tml_evt* evt) {
+int cb_rec (tml_evt* evt) {
     pico_output_set_color_draw_rgb(0xFF,0x00,0x00);
     pico_output_draw_pixel_xy(20,-20);
     pico_output_present();
