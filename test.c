@@ -19,8 +19,11 @@ int  cb_trv (tml_trv* trv);
 
 int main (void) {
     pico_open();
-    pico_output_set_auto(0);
+    //pico_output_set_size_wh(640,480);
+    pico_output_set_pixel_wh(4,4);
+    //pico_output_set_grid(0);
     pico_output_set_color_clear_rgb(0xFF,0xFF,0xFF);
+    pico_output_set_auto(0);
 
     tml_loop(20, cb_sim, cb_evt, cb_trv);
 }
@@ -147,6 +150,14 @@ int cb_trv (tml_trv* trv) {
 
     pico_output_set_color_draw_rgb(0x00,0xFF,0x00);
     pico_output_draw_pixel_xy(20,-20);
+    pico_output_draw_rect_xywh(  0,-50,10,10);
+    pico_output_draw_rect_xywh(-15,-50,10,10);
+    pico_output_draw_rect_xywh( 15,-50,10,10);
+    pico_output_draw_rect_xywh(-30,-50,10,10);
+    pico_output_draw_rect_xywh( 30,-50,10,10);
+    //pico_output_set_image_crop_xywh(20,40,40,40);
+    //pico_output_set_image_size_wh(20,20);
+    //pico_output_draw_image(((Pico_2i){0,-20}), "media.jpg");
     pico_output_present();
 
     switch (inp.type) {
