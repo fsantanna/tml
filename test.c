@@ -197,9 +197,9 @@ int cb_trv (int max, int cur, int* ret) {
                     return TML_RET_TRV;
                 }
             } else if (pico_isPointVsRect(pt, r4)) {
-                going = -1;
+                going--;
             } else if (pico_isPointVsRect(pt, r5)) {
-                going = 1;
+                going++;
             } else if (pico_isPointVsRect(pt, r6)) {
                 going = 0;
                 if (cur != 0) {
@@ -217,11 +217,10 @@ int cb_trv (int max, int cur, int* ret) {
         }
     }
     if (!has && going!=0) {
-        if (going==-1 && cur>0) {
-            *ret = cur - 1;
-            return TML_RET_TRV;
-        } else if (going==1 && cur<max) {
-            *ret = cur + 1;
+        #define MIN(X,Y) (((X) < (Y)) ? (X) : (Y))
+        #define MAX(X,Y) (((X) > (Y)) ? (X) : (Y))
+        *ret = MIN(max, MAX(0, cur+going));
+        if (*ret != cur) {
             return TML_RET_TRV;
         }
     }
