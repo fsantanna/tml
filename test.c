@@ -194,6 +194,7 @@ int cb_trv (int max, int cur, int* ret) {
         case SDL_KEYDOWN: {
             int key = inp.key.keysym.sym;
             if (key==SDLK_ESCAPE) {
+                going = _going = 0;
                 return TML_RET_REC;
             }
             break;
@@ -220,9 +221,9 @@ int cb_trv (int max, int cur, int* ret) {
                     return TML_RET_TRV;
                 }
             } else if (pico_isPointVsRect(pt, r4)) {
-                going--;
+                going = MIN(0,going) - 1;
             } else if (pico_isPointVsRect(pt, r5)) {
-                going++;
+                going = MAX(0,going) + 1;
             } else if (pico_isPointVsRect(pt, r6)) {
                 going = 0;
                 if (cur != 0) {
@@ -240,8 +241,6 @@ int cb_trv (int max, int cur, int* ret) {
         }
     }
     if (!has && going!=0) {
-        #define MIN(X,Y) (((X) < (Y)) ? (X) : (Y))
-        #define MAX(X,Y) (((X) > (Y)) ? (X) : (Y))
         *ret = MIN(max, MAX(0, cur+going));
         if (*ret != cur) {
             return TML_RET_TRV;

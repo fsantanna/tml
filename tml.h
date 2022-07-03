@@ -1,3 +1,6 @@
+#define MIN(X,Y) (((X) < (Y)) ? (X) : (Y))
+#define MAX(X,Y) (((X) > (Y)) ? (X) : (Y))
+
 enum {
     TML_RET_NONE = 0,
     TML_RET_REC,

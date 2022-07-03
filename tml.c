@@ -29,10 +29,11 @@ void tml_loop (int fps, int n, void* mem, void(*cb_sim)(tml_evt), void(*cb_eff)(
 
     cb_sim((tml_evt) { TML_EVT_FIRST });
     memcpy(MEM[0], mem, n);
-    printf("<<< memcpy %d\n", 0);
+    //printf("<<< memcpy %d\n", 0);
 
 _RET_REC_: {
 
+    //printf("REC %d\n", S.tick);
     while (1) {
         if (Q.nxt < Q.tot) {
             cb_sim(Q.buf[Q.nxt++].evt);
@@ -50,7 +51,7 @@ _RET_REC_: {
                 if (S.tick % 100 == 0) {
                     assert(MAX_MEM > S.tick/100);
                     memcpy(MEM[S.tick/100], mem, n);
-                    printf("<<< memcpy %d\n", S.tick);
+                    //printf("<<< memcpy %d\n", S.tick);
                 }
                 cb_eff();
             }
@@ -72,10 +73,12 @@ _RET_REC_: {
 
 _RET_TRV_: {
 
+    //printf("TRV %d\n", S.tick);
     uint32_t prv = SDL_GetTicks();
     uint32_t nxt = SDL_GetTicks();
     int tick = S.tick;
     int tot  = Q.tot;
+    int new  = -1;
 
     while (1) {
         uint32_t now = SDL_GetTicks();
@@ -87,14 +90,12 @@ _RET_TRV_: {
             nxt += S.mpf;
         }
 
-        static int new = -1;
-
         if (new != -1) {
             assert(0<=new && new<=S.tick);
             int e = 0;
             memcpy(mem, MEM[new/100], n);
             int fst = new - new%100;
-            printf(">>> memcpy %d / fst %d\n", new/100, fst);
+            //printf(">>> memcpy %d / fst %d\n", new/100, fst);
             for (int i=fst; i<=new; i++) {
                 if (i > fst) {
                     cb_sim((tml_evt) { TML_EVT_TICK, {.tick=i} });
@@ -116,8 +117,10 @@ _RET_TRV_: {
                 break;
             case TML_RET_REC:
                 S.nxt += (SDL_GetTicks() - prv);
+                //printf("OUT %d\n", tick);
                 S.tick = tick;
-                Q.tot  = tot;
+                Q.nxt = Q.tot = tot;
+                //Q.nxt = MIN(Q.nxt, Q.tot);
                 goto _RET_REC_;
                 break;
             case TML_RET_TRV: {
