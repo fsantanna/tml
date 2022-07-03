@@ -2,7 +2,8 @@
 #include <assert.h>
 #include "tml.h"
 
-#define EVT_MAX 10000
+#define MAX_EVT 10000
+#define MAX_MEM 1000
 
 typedef struct {
     int     tick;
@@ -10,8 +11,10 @@ typedef struct {
 } tml_tick_evt;
 
 void tml_loop (int fps, int n, void* mem, void(*cb_sim)(tml_evt), void(*cb_eff)(void), int(*cb_rec)(tml_evt*), int(*cb_trv)(int,int,int*)) {
+    char MEM[MAX_MEM][n];
     int mpf = 1000 / fps;
     assert(1000%fps == 0);
+
     struct {
         uint32_t nxt;
         int      mpf;
@@ -21,10 +24,12 @@ void tml_loop (int fps, int n, void* mem, void(*cb_sim)(tml_evt), void(*cb_eff)(
     struct {
         int tot;
         int nxt;
-        tml_tick_evt buf[EVT_MAX];
+        tml_tick_evt buf[MAX_EVT];
     } Q = { 0, 0, {} };
 
     cb_sim((tml_evt) { TML_EVT_FIRST });
+    memcpy(MEM[0], mem, n);
+    printf("<<< memcpy %d\n", 0);
 
 _RET_REC_: {
 
@@ -42,6 +47,11 @@ _RET_REC_: {
                 S.tick++;
                 S.nxt += S.mpf;
                 cb_sim((tml_evt) { TML_EVT_TICK, {.tick=S.tick} });
+                if (S.tick % 100 == 0) {
+                    assert(MAX_MEM > S.tick/100);
+                    memcpy(MEM[S.tick/100], mem, n);
+                    printf("<<< memcpy %d\n", S.tick);
+                }
                 cb_eff();
             }
 
@@ -50,7 +60,7 @@ _RET_REC_: {
                 case TML_RET_NONE:
                     break;
                 case TML_RET_REC:
-                    assert(Q.tot < EVT_MAX);
+                    assert(Q.tot < MAX_EVT);
                     Q.buf[Q.tot++] = (tml_tick_evt) { S.tick, evt };
                     break;
                 case TML_RET_TRV:
@@ -82,10 +92,11 @@ _RET_TRV_: {
         if (new != -1) {
             assert(0<=new && new<=S.tick);
             int e = 0;
-            for (int i=0; i<=new; i++) {
-                if (i == 0) {
-                    cb_sim((tml_evt) { TML_EVT_FIRST });
-                } else {
+            memcpy(mem, MEM[new/100], n);
+            int fst = new - new%100;
+            printf(">>> memcpy %d / fst %d\n", new/100, fst);
+            for (int i=fst; i<=new; i++) {
+                if (i > fst) {
                     cb_sim((tml_evt) { TML_EVT_TICK, {.tick=i} });
                 }
                 while (e<Q.tot && Q.buf[e].tick<=i) {
@@ -99,9 +110,9 @@ _RET_TRV_: {
             cb_eff();
         }
 
-        new = -1;
         switch (cb_trv(S.tick, tick, &new)) {
             case TML_RET_NONE:
+                new = -1;
                 break;
             case TML_RET_REC:
                 S.nxt += (SDL_GetTicks() - prv);
