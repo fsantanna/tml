@@ -53,7 +53,7 @@ _RET_REC_: {
                 cb_sim((tml_evt) { TML_EVT_TICK, {.tick=S.tick} });
                 if (S.tick % 100 == 0) {
                     assert(MAX_MEM > S.tick/100);
-                    memcpy(MEM[S.tick/100], mem, n);
+                    memcpy(MEM[S.tick/100], mem, n);    // save w/o events
                     //printf("<<< memcpy %d\n", S.tick);
                 }
                 cb_eff();
@@ -95,19 +95,20 @@ _RET_TRV_: {
 
         if (new != -1) {
             assert(0<=new && new<=S.tick);
-            int e = 0;
-            memcpy(mem, MEM[new/100], n);
+            memcpy(mem, MEM[new/100], n);   // load w/o events
             int fst = new - new%100;
-            printf(">>> memcpy %d / fst %d\n", new/100, fst);
+            //printf(">>> memcpy %d / fst %d\n", new/100, fst);
+
+            // skip events before fst
+            int e = 0;
+            for (; e<Q.tot && Q.buf[e].tick<fst; e++);
+
             for (int i=fst; i<=new; i++) {
-                if (i > fst) {
+                if (i > fst) { // first tick already loaded
                     cb_sim((tml_evt) { TML_EVT_TICK, {.tick=i} });
                 }
-                tml_tick_evt E = Q.buf[e];
-                while (e<Q.tot && E.tick<=i) {
-                    if (E.tick == i) {
-                        cb_sim(E.evt);
-                    }
+                while (e<Q.tot && Q.buf[e].tick==i) {
+                    cb_sim(Q.buf[e].evt);
                     e++;
                 }
             }
