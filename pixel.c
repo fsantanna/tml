@@ -50,20 +50,21 @@ int main (void) {
 void cb_sim (tml_evt evt) {
     switch (evt.id) {
         case TML_EVT_INIT:
-            G.pos = (SDL_Point) { 20, 20 };
-            G.vel = (SDL_Point) { 0, 0 };
+            G.pos = (SDL_Point) { 20, 250 };
+            G.vel = (SDL_Point) { 0, 5 };
             break;
         case TML_EVT_TICK:
             G.pos.x += G.vel.x;
-            G.pos.y += G.vel.y;
+            G.pos.y = MIN(250, G.pos.y+G.vel.y);
+            G.vel.y = MIN(5, G.vel.y+1);
             break;
         case TML_EVT_KEY:
             switch (evt.pay.i1) {
-                case SDLK_LEFT:  { G.vel.x=-1; G.vel.y=0; break; }
-                case SDLK_RIGHT: { G.vel.x= 1; G.vel.y=0; break; }
-                case SDLK_UP:    { G.vel.y=-1; G.vel.x=0; break; }
-                case SDLK_DOWN:  { G.vel.y= 1; G.vel.x=0; break; }
-                case SDLK_SPACE: { G.vel.x= 0; G.vel.y=0; break; }
+                case SDLK_LEFT:  { G.vel.x= -3; break; }
+                case SDLK_RIGHT: { G.vel.x=  3; break; }
+                case SDLK_UP:    { G.vel.x=  0; break; }
+                case SDLK_DOWN:  { G.vel.x=  0; break; }
+                case SDLK_SPACE: { G.vel.y=-10; break; }
             }
             break;
     }

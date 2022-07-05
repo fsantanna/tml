@@ -1,2 +1,3 @@
 # tml
-A Time Machine Library in C
+
+A Time Machine Library for SDL in C.
