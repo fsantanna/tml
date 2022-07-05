@@ -27,7 +27,7 @@ void tml_loop (int fps, int n, void* mem, void(*cb_sim)(tml_evt), void(*cb_eff)(
         tml_tick_evt buf[MAX_EVT];
     } Q = { 0, 0, {} };
 
-    cb_sim((tml_evt) { TML_EVT_FIRST });
+    cb_sim((tml_evt) { TML_EVT_INIT });
     memcpy(MEM[0], mem, n);
     //printf("<<< memcpy %d\n", 0);
 
@@ -38,6 +38,9 @@ _RET_REC_: {
         if (Q.nxt < Q.tot) {
             cb_sim(Q.buf[Q.nxt++].evt);
             cb_eff();
+            if (Q.buf[Q.nxt-1].evt.id == TML_EVT_QUIT) {
+                return;
+            }
         } else {
             uint32_t now = SDL_GetTicks();
             if (now < S.nxt) {
@@ -54,18 +57,18 @@ _RET_REC_: {
                     //printf("<<< memcpy %d\n", S.tick);
                 }
                 cb_eff();
-            }
-
-            tml_evt evt;
-            switch (cb_rec(&evt)) {
-                case TML_RET_NONE:
-                    break;
-                case TML_RET_REC:
-                    assert(Q.tot < MAX_EVT);
-                    Q.buf[Q.tot++] = (tml_tick_evt) { S.tick, evt };
-                    break;
-                case TML_RET_TRV:
-                    goto _RET_TRV_;
+            } else {
+                tml_evt evt;
+                switch (cb_rec(&evt)) {
+                    case TML_RET_NONE:
+                        break;
+                    case TML_RET_REC:
+                        assert(Q.tot < MAX_EVT);
+                        Q.buf[Q.tot++] = (tml_tick_evt) { S.tick, evt };
+                        break;
+                    case TML_RET_TRV:
+                        goto _RET_TRV_;
+                }
             }
         }
     }

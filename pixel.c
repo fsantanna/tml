@@ -1,18 +1,17 @@
 #if 0
 #!/bin/sh
-gcc -Wall -I ../pico-sdl/src/ `sdl2-config --cflags` tml.c ../pico-sdl/src/pico.c test.c -o xtest `sdl2-config --libs` -lSDL2_image -lSDL2_ttf
+gcc -Wall -I ../pico-sdl/src/ `sdl2-config --cflags` tml.c ../pico-sdl/src/pico.c pixel.c -o xpixel `sdl2-config --libs` -lSDL2_image -lSDL2_ttf
 exit
 #endif
 
 #include <assert.h>
 #include <stdlib.h>
 #include <time.h>
-#include "pico.h"
+#include <SDL.h>
 #include "tml.h"
 
 enum {
-    TML_EVT_KEY = TML_EVT_NEXT,
-    TML_EVT_DRAG
+    TML_EVT_KEY = TML_EVT_NEXT
 };
 
 void cb_sim (tml_evt);
@@ -20,103 +19,79 @@ void cb_eff (void);
 int  cb_rec (tml_evt* evt);
 int  cb_trv (int max, int cur, int* ret);
 
-unsigned int SEED;
-
-#define CARDS 2
 struct {
-    unsigned int seed;
-    Pico_2i cs[CARDS];
-    struct {
-        Pico_2i pos;
-        Pico_2i vel;
-    } pxs[2];
+    SDL_Point pos;
+    SDL_Point vel;
 } G;
 
-int main (void) {
-    pico_open();
-    //pico_output_set_size_wh(640,480);
-    pico_output_set_pixel_wh(5,5);
-    //pico_output_set_grid(0);
-    pico_output_set_color_clear_rgb(0xFF,0xFF,0xFF);
-    pico_output_set_auto(0);
+SDL_Renderer* REN = NULL;
 
-    SEED = time(NULL);
-    tml_loop(20, sizeof(G), &G, cb_sim, cb_eff, cb_rec, cb_trv);
+int main (void) {
+    assert(SDL_Init(SDL_INIT_VIDEO) == 0);
+
+    SDL_Window* win = SDL_CreateWindow (
+        "TML: Time Machine Library",
+        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+        400, 400,
+        SDL_WINDOW_SHOWN
+    );
+    assert(win != NULL);
+
+    REN = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED);
+    assert(REN != NULL);
+
+    tml_loop(50, sizeof(G), &G, cb_sim, cb_eff, cb_rec, cb_trv);
+
+    SDL_DestroyRenderer(REN);
+    SDL_DestroyWindow(win);
+    SDL_Quit();
 }
 
 void cb_sim (tml_evt evt) {
     switch (evt.id) {
         case TML_EVT_INIT:
-            G.seed = SEED;
-            G.cs[0] = (Pico_2i) { -10, 0 };
-            G.cs[1] = (Pico_2i) {  10, 0 };
-            G.pxs[0].pos = (Pico_2i) { 0, 0 };
-            G.pxs[0].vel = (Pico_2i) { 0, 0 };
-            G.pxs[1].pos = (Pico_2i) { 0, 0 };
-            G.pxs[1].vel = (Pico_2i) { 0, 0 };
+            G.pos = (SDL_Point) { 20, 20 };
+            G.vel = (SDL_Point) { 0, 0 };
             break;
         case TML_EVT_TICK:
-            G.pxs[0].pos._1 += G.pxs[0].vel._1;
-            G.pxs[0].pos._2 += G.pxs[0].vel._2;
-
-            int r1 = rand_r(&G.seed) % 3 - 1;
-            int r2 = rand_r(&G.seed) % 3 - 1;
-            G.pxs[1].pos._1 += r1;
-            G.pxs[1].pos._2 += r2;
+            G.pos.x += G.vel.x;
+            G.pos.y += G.vel.y;
             break;
         case TML_EVT_KEY:
             switch (evt.pay.i1) {
-                case SDLK_LEFT:  { G.pxs[0].vel._1=-1; G.pxs[0].vel._2=0; break; }
-                case SDLK_RIGHT: { G.pxs[0].vel._1= 1; G.pxs[0].vel._2=0; break; }
-                case SDLK_UP:    { G.pxs[0].vel._2= 1; G.pxs[0].vel._1=0; break; }
-                case SDLK_DOWN:  { G.pxs[0].vel._2=-1; G.pxs[0].vel._1=0; break; }
-                case SDLK_SPACE: { G.pxs[0].vel._1= 0; G.pxs[0].vel._2=0; break; }
+                case SDLK_LEFT:  { G.vel.x=-1; G.vel.y=0; break; }
+                case SDLK_RIGHT: { G.vel.x= 1; G.vel.y=0; break; }
+                case SDLK_UP:    { G.vel.y=-1; G.vel.x=0; break; }
+                case SDLK_DOWN:  { G.vel.y= 1; G.vel.x=0; break; }
+                case SDLK_SPACE: { G.vel.x= 0; G.vel.y=0; break; }
             }
-            break;
-        case TML_EVT_DRAG:
-            G.cs[evt.pay.i3._1] = (Pico_2i) { evt.pay.i3._2, evt.pay.i3._3 };
             break;
     }
 }
 
 void cb_eff (void) {
-    pico_output_clear();
-    pico_output_set_color_draw_rgb(0xFF,0x00,0x00);
-    for (int i=0; i<CARDS; i++) {
-        pico_output_draw_rect(G.cs[i], ((Pico_2i){5,9}));
-    }
-    pico_output_draw_pixel(G.pxs[0].pos);
-    pico_output_draw_pixel(G.pxs[1].pos);
-    pico_output_present();
+    SDL_SetRenderDrawColor(REN, 0xFF,0xFF,0xFF,0xFF);
+    SDL_RenderClear(REN);
+    SDL_SetRenderDrawColor(REN, 0xFF,0x00,0x00,0xFF);
+    SDL_Rect r = { G.pos.x, G.pos.y, 10, 10 };
+    SDL_RenderFillRect(REN, &r);
+    SDL_RenderPresent(REN);
 }
 
 int cb_rec (tml_evt* evt) {
-    pico_output_set_color_draw_rgb(0xFF,0x00,0x00);
-    pico_output_draw_pixel_xy(20,-20);
-    pico_output_present();
+    SDL_Event sdl;
+    assert(SDL_PollEvent(&sdl) != 0);
 
-    SDL_Event inp;
-    //int has =
-    pico_input_event_poll(&inp, SDL_ANY);
-    //assert(has);
-
-    static int drag_is = 0;
-    static int drag_i;
-    static Pico_2i drag_src;
-
-    switch (inp.type) {
+    switch (sdl.type) {
         case SDL_QUIT:
-            exit(0);
-            break;
+            *evt = (tml_evt) { TML_EVT_QUIT };
+            return TML_RET_REC;
         case SDL_KEYDOWN: {
-            int key = inp.key.keysym.sym;
+            int key = sdl.key.keysym.sym;
             if (key==SDLK_LEFT || key==SDLK_RIGHT ||
                 key==SDLK_UP   || key==SDLK_DOWN  ||
                 key==SDLK_SPACE
             ) {
-                //SDL_Rect r = { 190, 190, 20, 20 };
-                //SDL_SetRenderDrawColor(ren, 0x77,0x77,0x77,0x77);
-                //SDL_RenderFillRect(ren, &r);
                 *evt = (tml_evt) { TML_EVT_KEY, {.i1=key} };
                 return TML_RET_REC;
             }
@@ -125,38 +100,12 @@ int cb_rec (tml_evt* evt) {
             }
             break;
         }
-        case SDL_MOUSEBUTTONUP:
-            if (drag_is) {
-                *evt = (tml_evt) {
-                    TML_EVT_DRAG,
-                    { .i3 = {
-                        drag_i,
-                        G.cs[drag_i]._1 + (inp.button.x-drag_src._1),
-                        G.cs[drag_i]._2 + (inp.button.y-drag_src._2)
-                    }}
-                };
-                drag_is = 0;
-                return TML_RET_REC;
-            }
-            break;
-        case SDL_MOUSEBUTTONDOWN: {
-            Pico_2i pt = {inp.button.x, inp.button.y};
-            for (int i=0; i<CARDS; i++) {
-                Pico_4i r = { G.cs[i]._1, G.cs[i]._2, 5, 9 };
-                if (pico_isPointVsRect(pt,r)) {
-                    drag_is  = 1;
-                    drag_i   = i;
-                    drag_src = pt;
-                    break;
-                }
-            }
-            break;
-        }
     }
     return TML_RET_NONE;
 }
 
 int cb_trv (int max, int cur, int* ret) {
+#if 0
     SDL_Event inp;
     int has = pico_input_event_poll(&inp, SDL_ANY);
     //assert(has);
@@ -246,5 +195,6 @@ int cb_trv (int max, int cur, int* ret) {
             return TML_RET_TRV;
         }
     }
+#endif
     return TML_RET_NONE;
 }

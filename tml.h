@@ -8,7 +8,8 @@ enum {
 };
 
 enum {
-    TML_EVT_FIRST = 0,
+    TML_EVT_INIT = 0,
+    TML_EVT_QUIT,
     TML_EVT_TICK,
     TML_EVT_NEXT
 };
@@ -30,4 +31,12 @@ typedef struct {
     } pay;
 } tml_evt;
 
-void tml_loop (int fps, int n, void* mem, void(*cb_sim)(tml_evt), void(*cb_eff)(void), int(*cb_rec)(tml_evt*), int(*cb_trv)(int,int,int*));
+void tml_loop (
+    int fps,                        // desired frame rate
+    int men_n,                      // memory size in bytes
+    void* mem_buf,                  // pointer to memory contents
+    void (*cb_sim) (tml_evt),       // simulation callback
+    void (*cb_eff) (void),          // effects callback
+    int (*cb_rec) (tml_evt*),       // event recording callback
+    int (*cb_trv) (int,int,int*)    // travel mode callback
+);
