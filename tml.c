@@ -98,13 +98,16 @@ _RET_TRV_: {
             int e = 0;
             memcpy(mem, MEM[new/100], n);
             int fst = new - new%100;
-            //printf(">>> memcpy %d / fst %d\n", new/100, fst);
+            printf(">>> memcpy %d / fst %d\n", new/100, fst);
             for (int i=fst; i<=new; i++) {
                 if (i > fst) {
                     cb_sim((tml_evt) { TML_EVT_TICK, {.tick=i} });
                 }
-                while (e<Q.tot && Q.buf[e].tick<=i) {
-                    cb_sim(Q.buf[e].evt);
+                tml_tick_evt E = Q.buf[e];
+                while (e<Q.tot && E.tick<=i) {
+                    if (E.tick == i) {
+                        cb_sim(E.evt);
+                    }
                     e++;
                 }
             }

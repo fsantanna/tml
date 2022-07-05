@@ -59,7 +59,9 @@ void cb_sim (tml_evt evt) {
             G.vel.y = MIN(5, G.vel.y+1);
             break;
         case TML_EVT_JUMP:
-            G.vel.y = -10;
+            if (G.pos.y == 250) {
+                G.vel.y = -10;
+            }
             break;
     }
 }
