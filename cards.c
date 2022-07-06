@@ -1,6 +1,6 @@
 #if 0
 #!/bin/sh
-gcc -Wall `sdl2-config --cflags` tml.c cards.c -o xcards `sdl2-config --libs`
+gcc -Wall `sdl2-config --cflags` tml.c cards.c -o xcards `sdl2-config --libs` -lSDL2_image
 exit
 #endif
 
@@ -17,7 +17,6 @@ enum {
 void cb_sim (tml_evt);
 void cb_eff (int trv);
 int  cb_rec (SDL_Event* sdl, tml_evt* evt);
-int  cb_trv (SDL_Event* sdl, int max, int cur, int* ret);
 
 #define FPS   50
 #define WIN   400
@@ -41,12 +40,14 @@ unsigned int SEED;
 SDL_Renderer* REN = NULL;
 
 SDL_Rect r1 = {190,350,20,20};
-SDL_Rect r2 = {160,350,20,20};
-SDL_Rect r3 = {220,350,20,20};
-SDL_Rect r4 = {130,350,20,20};
-SDL_Rect r5 = {250,350,20,20};
-SDL_Rect r6 = {100,350,20,20};
-SDL_Rect r7 = {280,350,20,20};
+//SDL_Rect r2 = {160,350,20,20};
+//SDL_Rect r3 = {220,350,20,20};
+SDL_Rect r2 = {154,350,12,20};
+SDL_Rect r3 = {234,350,12,20};
+SDL_Rect r4 = {110,350,20,20};
+SDL_Rect r5 = {270,350,20,20};
+SDL_Rect r6 = { 70,350,20,20};
+SDL_Rect r7 = {310,350,20,20};
 
 #include "trv.c"
 
@@ -66,8 +67,10 @@ int main (void) {
     assert(REN != NULL);
     SDL_SetRenderDrawBlendMode(REN,SDL_BLENDMODE_BLEND);
 
-    tml_loop(50, sizeof(G), &G, cb_sim, cb_eff, cb_rec, cb_trv);
+    trv_init();
+    tml_loop(50, sizeof(G), &G, cb_sim, cb_eff, cb_rec, trv_cb);
 
+    trv_quit();
     SDL_DestroyRenderer(REN);
     SDL_DestroyWindow(win);
     SDL_Quit();
@@ -99,7 +102,7 @@ void cb_eff (int trv) {
     }
 
     if (trv) {
-        cb_trv_eff();
+        trv_eff();
     }
 
     SDL_RenderPresent(REN);

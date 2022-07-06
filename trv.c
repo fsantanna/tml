@@ -1,7 +1,32 @@
-void cb_trv_eff (void) {
+#include <SDL2/SDL_image.h>
+
+SDL_Texture *img1, *img2, *img3, *img4, *img5, *img6, *img7;
+
+void trv_init (void) {
+	img1 = IMG_LoadTexture(REN, "imgs/r1.png");
+	img2 = IMG_LoadTexture(REN, "imgs/r2.png");
+	img3 = IMG_LoadTexture(REN, "imgs/r3.png");
+	img4 = IMG_LoadTexture(REN, "imgs/r4.png");
+	img5 = IMG_LoadTexture(REN, "imgs/r5.png");
+	img6 = IMG_LoadTexture(REN, "imgs/r6.png");
+	img7 = IMG_LoadTexture(REN, "imgs/r7.png");
+}
+
+void trv_quit (void) {
+	SDL_DestroyTexture(img1);
+	SDL_DestroyTexture(img2);
+	SDL_DestroyTexture(img3);
+	SDL_DestroyTexture(img4);
+	SDL_DestroyTexture(img5);
+	SDL_DestroyTexture(img6);
+	SDL_DestroyTexture(img7);
+}
+
+void trv_eff (void) {
     SDL_SetRenderDrawColor(REN, 0xFF,0xFF,0xFF,0x77);
     SDL_RenderFillRect(REN, NULL);
 
+#if 0
     SDL_SetRenderDrawColor(REN, 0x00,0xFF,0x00,0xFF);
     SDL_RenderFillRect(REN, &r1);
     SDL_RenderFillRect(REN, &r2);
@@ -10,12 +35,18 @@ void cb_trv_eff (void) {
     SDL_RenderFillRect(REN, &r5);
     SDL_RenderFillRect(REN, &r6);
     SDL_RenderFillRect(REN, &r7);
-    //pico_output_set_image_crop_xywh(20,40,40,40);
-    //pico_output_set_image_size_wh(20,20);
-    //pico_output_draw_image(((Pico_2i){0,-20}), "media.jpg");
+#else
+    SDL_RenderCopy(REN, img1, NULL, &r1);
+    SDL_RenderCopy(REN, img2, NULL, &r2);
+    SDL_RenderCopy(REN, img3, NULL, &r3);
+    SDL_RenderCopy(REN, img4, NULL, &r4);
+    SDL_RenderCopy(REN, img5, NULL, &r5);
+    SDL_RenderCopy(REN, img6, NULL, &r6);
+    SDL_RenderCopy(REN, img7, NULL, &r7);
+#endif
 }
 
-int cb_trv (SDL_Event* sdl, int max, int cur, int* ret) {
+int trv_cb (SDL_Event* sdl, int max, int cur, int* ret) {
     static int _going = 0;
     static int going = 0;
 
