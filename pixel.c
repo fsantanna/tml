@@ -19,9 +19,21 @@ void cb_eff (void);
 int  cb_rec (tml_evt* evt);
 int  cb_trv (int max, int cur, int* ret);
 
+#define FPS   50
+#define WIN   400
+#define FLOOR (2*WIN/3)
+#define LAKEX (WIN/2-15)
+#define LAKEW 30
+
+#define DX    3
+#define DYG   5
+#define DYJ   -10
+#define DIM   10
+
 struct {
-    SDL_Point pos;
-    SDL_Point vel;
+    int x, y;
+    int dy;
+    int dead;
 } G;
 
 SDL_Renderer* REN = NULL;
@@ -32,7 +44,7 @@ int main (void) {
     SDL_Window* win = SDL_CreateWindow (
         "TML: Time Machine Library",
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-        400, 400,
+        WIN, WIN,
         SDL_WINDOW_SHOWN
     );
     assert(win != NULL);
@@ -50,17 +62,24 @@ int main (void) {
 void cb_sim (tml_evt evt) {
     switch (evt.id) {
         case TML_EVT_INIT:
-            G.pos = (SDL_Point) { 0, 250 };
-            G.vel = (SDL_Point) { 3, 5 };
+            G.x    = 0;
+            G.y    = FLOOR;
+            G.dy   = DYG;
+            G.dead = 0;
             break;
         case TML_EVT_TICK:
-            G.pos.x = (G.pos.x + G.vel.x) % 400;
-            G.pos.y = MIN(250, G.pos.y+G.vel.y);
-            G.vel.y = MIN(5, G.vel.y+1);
+            if (!G.dead) {
+                G.x  = (G.x + DX) % WIN;
+                G.y  = MIN(FLOOR, G.y+G.dy);
+                G.dy = MIN(DYG, G.dy+1);
+                G.dead = (G.y == FLOOR) && (LAKEX-DIM/2<=G.x && G.x<=LAKEX+LAKEW-DIM/2);
+            }
             break;
         case TML_EVT_JUMP:
-            if (G.pos.y == 250) {
-                G.vel.y = -10;
+            if (!G.dead) {
+                if (G.y == FLOOR) {
+                    G.dy = DYJ;
+                }
             }
             break;
     }
@@ -70,17 +89,20 @@ void cb_eff (void) {
     SDL_SetRenderDrawColor(REN, 0xFF,0xFF,0xFF,0xFF);
     SDL_RenderClear(REN);
     {
-        SDL_Rect r = { 0, 260, 400, 40 };
+        // FLOOR
+        SDL_Rect r = { 0, FLOOR+DIM, WIN, 4*DIM };
         SDL_SetRenderDrawColor(REN, 0x4B,0x37,0x1C,0xFF);
         SDL_RenderFillRect(REN, &r);
     }
     {
-        SDL_Rect r = { 200-20, 260, 40, 15 };
+        // LAKE
+        SDL_Rect r = { LAKEX, FLOOR+DIM, LAKEW, 2*DIM };
         SDL_SetRenderDrawColor(REN, 0x00,0x00,0xDD,0xFF);
         SDL_RenderFillRect(REN, &r);
     }
     {
-        SDL_Rect r = { G.pos.x, G.pos.y, 10, 10 };
+        // PIXEL
+        SDL_Rect r = { G.x, G.y, DIM, DIM };
         SDL_SetRenderDrawColor(REN, 0xFF,0x00,0x00,0xFF);
         SDL_RenderFillRect(REN, &r);
     }
