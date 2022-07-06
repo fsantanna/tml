@@ -16,8 +16,8 @@ enum {
 
 void cb_sim (tml_evt);
 void cb_eff (int trv);
-int  cb_rec (tml_evt* evt);
-int  cb_trv (int max, int cur, int* ret);
+int  cb_rec (SDL_Event* sdl, tml_evt* evt);
+int  cb_trv (SDL_Event* sdl, int max, int cur, int* ret);
 
 #define FPS   50
 #define WIN   400
@@ -118,17 +118,14 @@ void cb_eff (int trv) {
     SDL_RenderPresent(REN);
 }
 
-int cb_rec (tml_evt* evt) {
-    SDL_Event sdl;
-    assert(SDL_PollEvent(&sdl) != 0);
-
-    switch (sdl.type) {
+int cb_rec (SDL_Event* sdl, tml_evt* evt) {
+    switch (sdl->type) {
         case SDL_QUIT:
             *evt = (tml_evt) { TML_EVT_QUIT };
             return TML_RET_REC;
         case SDL_KEYDOWN: {
-            int key = sdl.key.keysym.sym;
-            if (key==SDLK_SPACE) {
+            int key = sdl->key.keysym.sym;
+            if (key==SDLK_UP) {
                 *evt = (tml_evt) { TML_EVT_JUMP };
                 return TML_RET_REC;
             }
@@ -141,26 +138,26 @@ int cb_rec (tml_evt* evt) {
     return TML_RET_NONE;
 }
 
-int cb_trv (int max, int cur, int* ret) {
+int  cb_trv (SDL_Event* sdl, int max, int cur, int* ret) {
     if (G.dead) {
         cur = MIN(cur,G.dead);
     }
 
-    SDL_Event sdl;
-    SDL_PollEvent(&sdl);
-
-    switch (sdl.type) {
-        case SDL_QUIT:
-            exit(0);
-            break;
-        case SDL_KEYUP: {
-            int key = sdl.key.keysym.sym;
-            if (key == SDLK_LEFT) {
-                return TML_RET_REC;
+    if (sdl != NULL) {
+        switch (sdl->type) {
+            case SDL_QUIT:
+                exit(0);
+                break;
+            case SDL_KEYUP: {
+                int key = sdl->key.keysym.sym;
+                if (key == SDLK_LEFT) {
+                    return TML_RET_REC;
+                }
+                break;
             }
-            break;
         }
     }
+
     *ret = MAX(0, cur-1);
     return TML_RET_TRV;
 }

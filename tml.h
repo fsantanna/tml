@@ -32,11 +32,11 @@ typedef struct {
 } tml_evt;
 
 void tml_loop (
-    int fps,                        // desired frame rate
-    int men_n,                      // memory size in bytes
-    void* mem_buf,                  // pointer to memory contents
-    void (*cb_sim) (tml_evt),       // simulation callback
-    void (*cb_eff) (int trv),       // effects callback
-    int (*cb_rec) (tml_evt*),       // event recording callback
-    int (*cb_trv) (int,int,int*)    // travel mode callback
+    int fps,                                // desired frame rate
+    int men_n,                              // memory size in bytes
+    void* mem_buf,                          // pointer to memory contents
+    void (*cb_sim) (tml_evt),               // simulation callback
+    void (*cb_eff) (int trv),               // effects callback
+    int (*cb_rec) (SDL_Event*,tml_evt*),    // event recording callback
+    int (*cb_trv) (SDL_Event*,int,int,int*) // travel mode callback
 );

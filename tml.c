@@ -10,7 +10,7 @@ typedef struct {
     tml_evt evt;
 } tml_tick_evt;
 
-void tml_loop (int fps, int n, void* mem, void(*cb_sim)(tml_evt), void(*cb_eff)(int), int(*cb_rec)(tml_evt*), int(*cb_trv)(int,int,int*)) {
+void tml_loop (int fps, int n, void* mem, void(*cb_sim)(tml_evt), void(*cb_eff)(int), int(*cb_rec)(SDL_Event*,tml_evt*), int(*cb_trv)(SDL_Event*,int,int,int*)) {
     char MEM[MAX_MEM][n];
     int mpf = 1000 / fps;
     assert(1000%fps == 0);
@@ -58,8 +58,11 @@ _RET_REC_: {
                 }
                 cb_eff(0);
             } else {
-                tml_evt evt;
-                switch (cb_rec(&evt)) {
+                SDL_Event sdl;
+                tml_evt   evt;
+                assert(SDL_PollEvent(&sdl));
+
+                switch (cb_rec(&sdl, &evt)) {
                     case TML_RET_NONE:
                         break;
                     case TML_RET_REC:
@@ -120,7 +123,10 @@ _RET_TRV_: {
             cb_eff(1);
         }
 
-        switch (cb_trv(S.tick, tick, &new)) {
+        SDL_Event sdl;
+        SDL_Event* ptr = SDL_PollEvent(&sdl) ? &sdl : NULL;
+
+        switch (cb_trv(ptr, S.tick, tick, &new)) {
             case TML_RET_NONE:
                 new = -1;
                 break;

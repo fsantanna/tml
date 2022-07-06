@@ -17,8 +17,8 @@ enum {
 
 void cb_sim (tml_evt evt);
 void cb_eff (int trv);
-int  cb_rec (tml_evt* evt);
-int  cb_trv (int max, int cur, int* ret);
+int  cb_rec (SDL_Event* sdl, tml_evt* evt);
+int  cb_trv (SDL_Event* sdl, int max, int cur, int* ret);
 
 unsigned int SEED;
 
@@ -119,22 +119,18 @@ void cb_eff (int trv) {
     pico_output_present();
 }
 
-int cb_rec (tml_evt* evt) {
-    SDL_Event inp;
-    //int has =
-    pico_input_event_poll(&inp, SDL_ANY);
-    //assert(has);
-
+int cb_rec (SDL_Event* sdl, tml_evt* evt) {
     static int drag_is = 0;
     static int drag_i;
     static Pico_2i drag_src;
 
-    switch (inp.type) {
+    pico_event_from_sdl(sdl, SDL_ANY);
+    switch (sdl->type) {
         case SDL_QUIT:
             exit(0);
             break;
         case SDL_KEYDOWN: {
-            int key = inp.key.keysym.sym;
+            int key = sdl->key.keysym.sym;
             if (key==SDLK_LEFT || key==SDLK_RIGHT ||
                 key==SDLK_UP   || key==SDLK_DOWN  ||
                 key==SDLK_SPACE
@@ -156,8 +152,8 @@ int cb_rec (tml_evt* evt) {
                     TML_EVT_DRAG,
                     { .i3 = {
                         drag_i,
-                        G.cs[drag_i]._1 + (inp.button.x-drag_src._1),
-                        G.cs[drag_i]._2 + (inp.button.y-drag_src._2)
+                        G.cs[drag_i]._1 + (sdl->button.x-drag_src._1),
+                        G.cs[drag_i]._2 + (sdl->button.y-drag_src._2)
                     }}
                 };
                 drag_is = 0;
@@ -165,7 +161,7 @@ int cb_rec (tml_evt* evt) {
             }
             break;
         case SDL_MOUSEBUTTONDOWN: {
-            Pico_2i pt = {inp.button.x, inp.button.y};
+            Pico_2i pt = {sdl->button.x, sdl->button.y};
             for (int i=0; i<CARDS; i++) {
                 Pico_4i r = { G.cs[i]._1, G.cs[i]._2, 5, 9 };
                 if (pico_isPointVsRect(pt,r)) {
@@ -181,72 +177,73 @@ int cb_rec (tml_evt* evt) {
     return TML_RET_NONE;
 }
 
-int cb_trv (int max, int cur, int* ret) {
-    SDL_Event inp;
-    int has = pico_input_event_poll(&inp, SDL_ANY);
-    //assert(has);
-
+int cb_trv (SDL_Event* sdl, int max, int cur, int* ret) {
     static int _going = 0;
     static int going = 0;
 
-    switch (inp.type) {
-        case SDL_QUIT:
-            exit(0);
-            break;
-        case SDL_KEYDOWN: {
-            int key = inp.key.keysym.sym;
-            if (key==SDLK_ESCAPE) {
-                going = _going = 0;
-                return TML_RET_REC;
-            }
-            break;
-        }
-        case SDL_MOUSEBUTTONDOWN: {
-            Pico_2i pt = { inp.button.x, inp.button.y };
-            if (pico_isPointVsRect(pt, r1)) {
-                if (going == 0) {
-                    going = _going;
-                } else {
-                    _going = going;
-                    going = 0;
-                }
-            } else if (pico_isPointVsRect(pt, r2)) {
-                going = 0;
-                if (cur > 0) {
-                    *ret = cur - 1;
-                    return TML_RET_TRV;
-                }
-            } else if (pico_isPointVsRect(pt, r3)) {
-                going = 0;
-                if (cur < max) {
-                    *ret = cur + 1;
-                    return TML_RET_TRV;
-                }
-            } else if (pico_isPointVsRect(pt, r4)) {
-                going = MIN(0,going) - 1;
-            } else if (pico_isPointVsRect(pt, r5)) {
-                going = MAX(0,going) + 1;
-            } else if (pico_isPointVsRect(pt, r6)) {
-                going = 0;
-                if (cur != 0) {
-                    *ret = 0;
-                    return TML_RET_TRV;
-                }
-            } else if (pico_isPointVsRect(pt, r7)) {
-                going = 0;
-                if (cur != max) {
-                    *ret = max;
-                    return TML_RET_TRV;
-                }
+    if (sdl == NULL) {
+        if (going != 0) {
+            *ret = MIN(max, MAX(0, cur+going));
+            if (*ret != cur) {
                 return TML_RET_TRV;
             }
         }
-    }
-    if (!has && going!=0) {
-        *ret = MIN(max, MAX(0, cur+going));
-        if (*ret != cur) {
-            return TML_RET_TRV;
+    } else {
+        pico_event_from_sdl(sdl, SDL_ANY);
+        switch (sdl->type) {
+            case SDL_QUIT:
+                exit(0);
+                break;
+            case SDL_KEYDOWN: {
+                int key = sdl->key.keysym.sym;
+                if (key==SDLK_ESCAPE) {
+                    going = _going = 0;
+                    return TML_RET_REC;
+                }
+                break;
+            }
+            case SDL_MOUSEBUTTONDOWN: {
+                Pico_2i pt = { sdl->button.x, sdl->button.y };
+                if (pico_isPointVsRect(pt, r1)) {
+                    if (going == 0) {
+                        going = _going;
+                    } else {
+                        _going = going;
+                        going = 0;
+                    }
+                } else if (pico_isPointVsRect(pt, r2)) {
+                    going = 0;
+                    if (cur > 0) {
+                        *ret = cur - 1;
+                        return TML_RET_TRV;
+                    }
+                } else if (pico_isPointVsRect(pt, r3)) {
+                    going = 0;
+                    if (cur < max) {
+                        *ret = cur + 1;
+                        return TML_RET_TRV;
+                    }
+                } else if (pico_isPointVsRect(pt, r4)) {
+                    going = MIN(0,going) - 1;
+                } else if (pico_isPointVsRect(pt, r5)) {
+                    going = MAX(0,going) + 1;
+                } else if (pico_isPointVsRect(pt, r6)) {
+                    going = 0;
+                    if (cur != 0) {
+                        *ret = 0;
+                        return TML_RET_TRV;
+                    }
+                } else if (pico_isPointVsRect(pt, r7)) {
+                    going = 0;
+                    if (cur != max) {
+                        *ret = max;
+                        return TML_RET_TRV;
+                    }
+                    return TML_RET_TRV;
+                }
+            }
         }
     }
+
     return TML_RET_NONE;
 }
