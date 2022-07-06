@@ -1,6 +1,8 @@
 #include <SDL2/SDL_image.h>
 
-SDL_Texture* imgs[7];
+static SDL_Texture* imgs[7];
+
+static int MAX=-1, CUR=-1;
 
 void trv_init (void) {
 	imgs[0] = IMG_LoadTexture(REN, "imgs/r0.png");
@@ -21,17 +23,30 @@ void trv_quit (void) {
 void trv_eff (void) {
     SDL_SetRenderDrawColor(REN, 0xFF,0xFF,0xFF,0x77);
     SDL_RenderFillRect(REN, NULL);
-#if 0
-    SDL_SetRenderDrawColor(REN, 0x00,0xFF,0x00,0xFF);
-    SDL_RenderFillRect(REN, &r1);
-#else
+
+    // time bar
+    {
+        int y = trv_rs[0].y - 15;
+        int x = trv_rs[5].x;
+        int w = trv_rs[6].x + trv_rs[6].w - trv_rs[5].x;
+        SDL_Rect r = { x, y, w, 5 };
+        SDL_SetRenderDrawColor(REN, 0x00,0x00,0x00,0xFF);
+        SDL_RenderFillRect(REN, &r);
+
+        int T = (MAX>0) ? CUR*1000/MAX * w / 1000 : w;
+        SDL_Rect p = { x+T-1, y, 3, 5 };
+        SDL_SetRenderDrawColor(REN, 0xFF,0xFF,0xFF,0xFF);
+        SDL_RenderFillRect(REN, &p);
+    }
+
     for (int i=0; i<7; i++) {
         SDL_RenderCopy(REN, imgs[i], NULL, &trv_rs[i]);
     }
-#endif
 }
 
 int trv_cb (SDL_Event* sdl, int max, int cur, int* ret) {
+    MAX = max;
+    CUR = cur;
     static int _going = 0;
     static int going = 0;
 
@@ -39,6 +54,7 @@ int trv_cb (SDL_Event* sdl, int max, int cur, int* ret) {
         if (going != 0) {
             *ret = MIN(max, MAX(0, cur+going));
             if (*ret != cur) {
+                CUR = *ret;
                 return TML_RET_TRV;
             }
         }
@@ -49,6 +65,7 @@ int trv_cb (SDL_Event* sdl, int max, int cur, int* ret) {
             case SDL_KEYDOWN: {
                 int key = sdl->key.keysym.sym;
                 if (key==SDLK_ESCAPE) {
+                    MAX = CUR = -1;
                     going = _going = 0;
                     return TML_RET_REC;
                 }
@@ -71,6 +88,7 @@ int trv_cb (SDL_Event* sdl, int max, int cur, int* ret) {
                                 going = 0;
                                 if (cur > 0) {
                                     *ret = cur - 1;
+                                    CUR = *ret;
                                     return TML_RET_TRV;
                                 }
                                 break;
@@ -78,6 +96,7 @@ int trv_cb (SDL_Event* sdl, int max, int cur, int* ret) {
                                 going = 0;
                                 if (cur < max) {
                                     *ret = cur + 1;
+                                    CUR = *ret;
                                     return TML_RET_TRV;
                                 }
                                 break;
@@ -91,6 +110,7 @@ int trv_cb (SDL_Event* sdl, int max, int cur, int* ret) {
                                 going = 0;
                                 if (cur != 0) {
                                     *ret = 0;
+                                    CUR = *ret;
                                     return TML_RET_TRV;
                                 }
                                 break;
@@ -98,6 +118,7 @@ int trv_cb (SDL_Event* sdl, int max, int cur, int* ret) {
                                 going = 0;
                                 if (cur != max) {
                                     *ret = max;
+                                    CUR = *ret;
                                     return TML_RET_TRV;
                                 }
                                 break;
