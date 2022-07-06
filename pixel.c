@@ -22,8 +22,8 @@ int  cb_trv (int max, int cur, int* ret);
 #define FPS   50
 #define WIN   400
 #define FLOOR (2*WIN/3)
-#define LAKEX (WIN/2-15)
-#define LAKEW 30
+#define LAKEW 60
+#define LAKEX (WIN/2-LAKEW/2)
 
 #define DX    3
 #define DYG   5

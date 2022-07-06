@@ -15,8 +15,8 @@ enum {
     TML_EVT_DRAG
 };
 
-void cb_sim (tml_evt);
-void cb_eff (void);
+void cb_sim (tml_evt evt);
+void cb_eff (int trv);
 int  cb_rec (tml_evt* evt);
 int  cb_trv (int max, int cur, int* ret);
 
@@ -31,6 +31,14 @@ struct {
         Pico_2i vel;
     } pxs[2];
 } G;
+
+Pico_4i r1 = {  0,-50,10,10};
+Pico_4i r2 = {-15,-50,10,10};
+Pico_4i r3 = { 15,-50,10,10};
+Pico_4i r4 = {-30,-50,10,10};
+Pico_4i r5 = { 30,-50,10,10};
+Pico_4i r6 = {-45,-50,10,10};
+Pico_4i r7 = { 45,-50,10,10};
 
 int main (void) {
     pico_open();
@@ -79,22 +87,39 @@ void cb_sim (tml_evt evt) {
     }
 }
 
-void cb_eff (void) {
+void cb_eff (int trv) {
     pico_output_clear();
+
     pico_output_set_color_draw_rgb(0xFF,0x00,0x00);
     for (int i=0; i<CARDS; i++) {
         pico_output_draw_rect(G.cs[i], ((Pico_2i){5,9}));
     }
     pico_output_draw_pixel(G.pxs[0].pos);
     pico_output_draw_pixel(G.pxs[1].pos);
+
+    if (trv) {
+        pico_output_set_color_draw_rgb(0x00,0xFF,0x00);
+        pico_output_draw_pixel_xy(20,-20);
+
+        pico_output_draw_rect_4i(r1);
+        pico_output_draw_rect_4i(r2);
+        pico_output_draw_rect_4i(r3);
+        pico_output_draw_rect_4i(r4);
+        pico_output_draw_rect_4i(r5);
+        pico_output_draw_rect_4i(r6);
+        pico_output_draw_rect_4i(r7);
+        //pico_output_set_image_crop_xywh(20,40,40,40);
+        //pico_output_set_image_size_wh(20,20);
+        //pico_output_draw_image(((Pico_2i){0,-20}), "media.jpg");
+    } else {
+        pico_output_set_color_draw_rgb(0xFF,0x00,0x00);
+        pico_output_draw_pixel_xy(20,-20);
+    }
+
     pico_output_present();
 }
 
 int cb_rec (tml_evt* evt) {
-    pico_output_set_color_draw_rgb(0xFF,0x00,0x00);
-    pico_output_draw_pixel_xy(20,-20);
-    pico_output_present();
-
     SDL_Event inp;
     //int has =
     pico_input_event_poll(&inp, SDL_ANY);
@@ -160,29 +185,6 @@ int cb_trv (int max, int cur, int* ret) {
     SDL_Event inp;
     int has = pico_input_event_poll(&inp, SDL_ANY);
     //assert(has);
-
-    pico_output_set_color_draw_rgb(0x00,0xFF,0x00);
-    pico_output_draw_pixel_xy(20,-20);
-
-    Pico_4i r1 = {  0,-50,10,10};
-    Pico_4i r2 = {-15,-50,10,10};
-    Pico_4i r3 = { 15,-50,10,10};
-    Pico_4i r4 = {-30,-50,10,10};
-    Pico_4i r5 = { 30,-50,10,10};
-    Pico_4i r6 = {-45,-50,10,10};
-    Pico_4i r7 = { 45,-50,10,10};
-
-    pico_output_draw_rect_4i(r1);
-    pico_output_draw_rect_4i(r2);
-    pico_output_draw_rect_4i(r3);
-    pico_output_draw_rect_4i(r4);
-    pico_output_draw_rect_4i(r5);
-    pico_output_draw_rect_4i(r6);
-    pico_output_draw_rect_4i(r7);
-    //pico_output_set_image_crop_xywh(20,40,40,40);
-    //pico_output_set_image_size_wh(20,20);
-    //pico_output_draw_image(((Pico_2i){0,-20}), "media.jpg");
-    pico_output_present();
 
     static int _going = 0;
     static int going = 0;

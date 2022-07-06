@@ -76,6 +76,8 @@ _RET_REC_: {
 
 _RET_TRV_: {
 
+    cb_eff(1);
+
     //printf("TRV %d\n", S.tick);
     uint32_t prv = SDL_GetTicks();
     uint32_t nxt = SDL_GetTicks();
