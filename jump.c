@@ -1,6 +1,6 @@
 #if 0
 #!/bin/sh
-gcc -Wall -I ../pico-sdl/src/ `sdl2-config --cflags` tml.c ../pico-sdl/src/pico.c pixel.c -o xpixel `sdl2-config --libs` -lSDL2_image -lSDL2_ttf
+gcc -Wall `sdl2-config --cflags` tml.c jump.c -o xjump `sdl2-config --libs`
 exit
 #endif
 
@@ -93,8 +93,8 @@ void cb_eff (int trv) {
     SDL_RenderClear(REN);
     {
         // FLOOR
-        SDL_Rect r = { 0, FLOOR+DIM, WIN, 4*DIM };
-        SDL_SetRenderDrawColor(REN, 0x4B,0x37,0x1C,0xFF);
+        SDL_Rect r = { 0, FLOOR+DIM, WIN, WIN-FLOOR-DIM };
+        SDL_SetRenderDrawColor(REN, 0x4E,0x51,0x47,0xFF);
         SDL_RenderFillRect(REN, &r);
     }
     {
