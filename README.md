@@ -21,3 +21,5 @@ number of limitations in the programming API:
 
 - No stateful calls are allowed (e.g., `rand`, `fopen`, etc).
 - All memory state must be static and/or preallocated.
+
+# API
