@@ -15,7 +15,7 @@ enum {
 };
 
 void cb_sim (tml_evt);
-void cb_eff (void);
+void cb_eff (int trv);
 int  cb_rec (tml_evt* evt);
 int  cb_trv (int max, int cur, int* ret);
 
@@ -51,6 +51,7 @@ int main (void) {
 
     REN = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED);
     assert(REN != NULL);
+    SDL_SetRenderDrawBlendMode(REN,SDL_BLENDMODE_BLEND);
 
     tml_loop(50, sizeof(G), &G, cb_sim, cb_eff, cb_rec, cb_trv);
 
@@ -72,7 +73,9 @@ void cb_sim (tml_evt evt) {
                 G.x  = (G.x + DX) % WIN;
                 G.y  = MIN(FLOOR, G.y+G.dy);
                 G.dy = MIN(DYG, G.dy+1);
-                G.dead = (G.y == FLOOR) && (LAKEX-DIM/2<=G.x && G.x<=LAKEX+LAKEW-DIM/2);
+                if ((G.y == FLOOR) && (LAKEX-DIM/2<=G.x && G.x<=LAKEX+LAKEW-DIM/2)) {
+                    G.dead = evt.pay.tick;
+                }
             }
             break;
         case TML_EVT_JUMP:
@@ -85,7 +88,7 @@ void cb_sim (tml_evt evt) {
     }
 }
 
-void cb_eff (void) {
+void cb_eff (int trv) {
     SDL_SetRenderDrawColor(REN, 0xFF,0xFF,0xFF,0xFF);
     SDL_RenderClear(REN);
     {
@@ -106,6 +109,12 @@ void cb_eff (void) {
         SDL_SetRenderDrawColor(REN, 0xFF,0x00,0x00,0xFF);
         SDL_RenderFillRect(REN, &r);
     }
+
+    if (trv) {
+        SDL_SetRenderDrawColor(REN, 0xFF,0xFF,0xFF,0x77);
+        SDL_RenderFillRect(REN, NULL);
+    }
+
     SDL_RenderPresent(REN);
 }
 
@@ -133,6 +142,10 @@ int cb_rec (tml_evt* evt) {
 }
 
 int cb_trv (int max, int cur, int* ret) {
+    if (G.dead) {
+        cur = MIN(cur,G.dead);
+    }
+
     SDL_Event sdl;
     SDL_PollEvent(&sdl);
 

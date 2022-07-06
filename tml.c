@@ -10,7 +10,7 @@ typedef struct {
     tml_evt evt;
 } tml_tick_evt;
 
-void tml_loop (int fps, int n, void* mem, void(*cb_sim)(tml_evt), void(*cb_eff)(void), int(*cb_rec)(tml_evt*), int(*cb_trv)(int,int,int*)) {
+void tml_loop (int fps, int n, void* mem, void(*cb_sim)(tml_evt), void(*cb_eff)(int), int(*cb_rec)(tml_evt*), int(*cb_trv)(int,int,int*)) {
     char MEM[MAX_MEM][n];
     int mpf = 1000 / fps;
     assert(1000%fps == 0);
@@ -37,7 +37,7 @@ _RET_REC_: {
     while (1) {
         if (Q.nxt < Q.tot) {
             cb_sim(Q.buf[Q.nxt++].evt);
-            cb_eff();
+            cb_eff(0);
             if (Q.buf[Q.nxt-1].evt.id == TML_EVT_QUIT) {
                 return;
             }
@@ -56,7 +56,7 @@ _RET_REC_: {
                     memcpy(MEM[S.tick/100], mem, n);    // save w/o events
                     //printf("<<< memcpy %d\n", S.tick);
                 }
-                cb_eff();
+                cb_eff(0);
             } else {
                 tml_evt evt;
                 switch (cb_rec(&evt)) {
@@ -115,7 +115,7 @@ _RET_TRV_: {
             tick = new;
             tot  = e;
             //SDL_Delay(S.mpf);
-            cb_eff();
+            cb_eff(1);
         }
 
         switch (cb_trv(S.tick, tick, &new)) {

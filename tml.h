@@ -36,7 +36,7 @@ void tml_loop (
     int men_n,                      // memory size in bytes
     void* mem_buf,                  // pointer to memory contents
     void (*cb_sim) (tml_evt),       // simulation callback
-    void (*cb_eff) (void),          // effects callback
+    void (*cb_eff) (int trv),       // effects callback
     int (*cb_rec) (tml_evt*),       // event recording callback
     int (*cb_trv) (int,int,int*)    // travel mode callback
 );
