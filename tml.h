@@ -3,13 +3,13 @@
 
 enum {
     TML_RET_NONE = 0,
+    TML_RET_QUIT,
     TML_RET_REC,
     TML_RET_TRV
 };
 
 enum {
     TML_EVT_INIT = 0,
-    TML_EVT_QUIT,
     TML_EVT_TICK,
     TML_EVT_NEXT
 };

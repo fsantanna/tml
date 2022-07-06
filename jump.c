@@ -121,8 +121,7 @@ void cb_eff (int trv) {
 int cb_rec (SDL_Event* sdl, tml_evt* evt) {
     switch (sdl->type) {
         case SDL_QUIT:
-            *evt = (tml_evt) { TML_EVT_QUIT };
-            return TML_RET_REC;
+            return TML_RET_QUIT;
         case SDL_KEYDOWN: {
             int key = sdl->key.keysym.sym;
             if (key==SDLK_UP) {
@@ -146,8 +145,7 @@ int  cb_trv (SDL_Event* sdl, int max, int cur, int* ret) {
     if (sdl != NULL) {
         switch (sdl->type) {
             case SDL_QUIT:
-                exit(0);
-                break;
+                return TML_RET_QUIT;
             case SDL_KEYUP: {
                 int key = sdl->key.keysym.sym;
                 if (key == SDLK_LEFT) {

@@ -38,9 +38,6 @@ _RET_REC_: {
         if (Q.nxt < Q.tot) {
             cb_sim(Q.buf[Q.nxt++].evt);
             cb_eff(0);
-            if (Q.buf[Q.nxt-1].evt.id == TML_EVT_QUIT) {
-                return;
-            }
         } else {
             uint32_t now = SDL_GetTicks();
             if (now < S.nxt) {
@@ -65,6 +62,8 @@ _RET_REC_: {
                 switch (cb_rec(&sdl, &evt)) {
                     case TML_RET_NONE:
                         break;
+                    case TML_RET_QUIT:
+                        return;
                     case TML_RET_REC:
                         assert(Q.tot < MAX_EVT);
                         Q.buf[Q.tot++] = (tml_tick_evt) { S.tick, evt };
@@ -130,6 +129,8 @@ _RET_TRV_: {
             case TML_RET_NONE:
                 new = -1;
                 break;
+            case TML_RET_QUIT:
+                return;
             case TML_RET_REC:
                 S.nxt += (SDL_GetTicks() - prv);
                 //printf("OUT %d\n", tick);

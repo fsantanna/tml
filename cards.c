@@ -40,13 +40,15 @@ struct {
 unsigned int SEED;
 SDL_Renderer* REN = NULL;
 
-SDL_Rect r1 = {190,350,10,10};
-SDL_Rect r2 = {170,350,10,10};
-SDL_Rect r3 = {210,350,10,10};
-SDL_Rect r4 = {150,350,10,10};
-SDL_Rect r5 = {230,350,10,10};
-SDL_Rect r6 = {130,350,10,10};
-SDL_Rect r7 = {250,350,10,10};
+SDL_Rect r1 = {190,350,20,20};
+SDL_Rect r2 = {160,350,20,20};
+SDL_Rect r3 = {220,350,20,20};
+SDL_Rect r4 = {130,350,20,20};
+SDL_Rect r5 = {250,350,20,20};
+SDL_Rect r6 = {100,350,20,20};
+SDL_Rect r7 = {280,350,20,20};
+
+#include "trv.c"
 
 int main (void) {
     SEED = time(NULL);
@@ -97,20 +99,7 @@ void cb_eff (int trv) {
     }
 
     if (trv) {
-        SDL_SetRenderDrawColor(REN, 0xFF,0xFF,0xFF,0x77);
-        SDL_RenderFillRect(REN, NULL);
-
-        SDL_SetRenderDrawColor(REN, 0x00,0xFF,0x00,0xFF);
-        SDL_RenderFillRect(REN, &r1);
-        SDL_RenderFillRect(REN, &r2);
-        SDL_RenderFillRect(REN, &r3);
-        SDL_RenderFillRect(REN, &r4);
-        SDL_RenderFillRect(REN, &r5);
-        SDL_RenderFillRect(REN, &r6);
-        SDL_RenderFillRect(REN, &r7);
-        //pico_output_set_image_crop_xywh(20,40,40,40);
-        //pico_output_set_image_size_wh(20,20);
-        //pico_output_draw_image(((Pico_2i){0,-20}), "media.jpg");
+        cb_trv_eff();
     }
 
     SDL_RenderPresent(REN);
@@ -123,8 +112,7 @@ int cb_rec (SDL_Event* sdl, tml_evt* evt) {
 
     switch (sdl->type) {
         case SDL_QUIT:
-            *evt = (tml_evt) { TML_EVT_QUIT };
-            return TML_RET_REC;
+            return TML_RET_QUIT;
         case SDL_KEYDOWN: {
             int key = sdl->key.keysym.sym;
             if (key == SDLK_ESCAPE) {
@@ -161,19 +149,4 @@ int cb_rec (SDL_Event* sdl, tml_evt* evt) {
             break;
     }
     return TML_RET_NONE;
-}
-
-int  cb_trv (SDL_Event* sdl, int max, int cur, int* ret) {
-    if (sdl != NULL) {
-        switch (sdl->type) {
-            case SDL_KEYDOWN: {
-                int key = sdl->key.keysym.sym;
-                if (key == SDLK_ESCAPE) {
-                    return TML_RET_REC;
-                }
-                break;
-            }
-        }
-    }
-    return TML_RET_TRV;
 }
