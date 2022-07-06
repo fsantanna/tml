@@ -1,6 +1,6 @@
 #if 0
 #!/bin/sh
-gcc -Wall `sdl2-config --cflags` tml.c cards.c -o xcards `sdl2-config --libs` -lSDL2_image
+gcc -Wall `sdl2-config --cflags` tml.c cards.c -o xcards `sdl2-config --libs` -lSDL2_image -lSDL2_ttf
 exit
 #endif
 
@@ -8,6 +8,7 @@ exit
 #include <stdlib.h>
 #include <time.h>
 #include <SDL.h>
+#include <SDL2/SDL_ttf.h>
 #include "tml.h"
 
 enum {
@@ -35,6 +36,8 @@ struct {
     unsigned int seed;
     Card cards[CARDS];
 } G;
+
+SDL_Texture* txts[CARDS];
 
 unsigned int SEED;
 SDL_Renderer* REN = NULL;
@@ -69,13 +72,41 @@ int main (void) {
     assert(REN != NULL);
     SDL_SetRenderDrawBlendMode(REN,SDL_BLENDMODE_BLEND);
 
+    assert(TTF_Init() == 0);
+    TTF_Font* fnt = TTF_OpenFont("tiny.ttf", CARDH/2);
+    assert(fnt != NULL);
+    for (int i=0; i<CARDS; i++) {
+        char txt[16];
+        sprintf(txt, "%d", i+1);
+        SDL_Surface* sfc = TTF_RenderText_Blended(fnt, txt, (SDL_Color){0x00,0x00,0x00,0xFF});
+        assert(sfc != NULL);
+        txts[i] = SDL_CreateTextureFromSurface(REN, sfc);
+        assert(txts[i] != NULL);
+        SDL_FreeSurface(sfc);
+    }
+    TTF_CloseFont(fnt);
+    TTF_Quit();
+
     trv_init();
     tml_loop(50, sizeof(G), &G, cb_sim, cb_eff, cb_rec, trv_cb);
 
+    for (int i=0; i<CARDS; i++) {
+        SDL_DestroyTexture(txts[i]);
+    }
     trv_quit();
     SDL_DestroyRenderer(REN);
     SDL_DestroyWindow(win);
     SDL_Quit();
+}
+
+// https://stackoverflow.com/a/6127606
+void shuffle (void) {
+    for (int i=0; i<CARDS-1; i++) {
+        int j = i + rand_r(&G.seed) / (RAND_MAX / (CARDS - i) + 1);
+        Card t = G.cards[j];
+        G.cards[j] = G.cards[i];
+        G.cards[i] = t;
+    }
 }
 
 void cb_sim (tml_evt evt) {
@@ -83,8 +114,9 @@ void cb_sim (tml_evt evt) {
         case TML_EVT_INIT:
             G.seed = SEED;
             for (int i=0; i<CARDS; i++) {
-                G.cards[i] = (Card) { i+1, WIN/2-CARDW/2, WIN/2-CARDH/2 };
+                G.cards[i] = (Card) { i, WIN/2-CARDW/2, WIN/2-CARDH/2 };
             }
+            shuffle();
             break;
         case TML_EVT_DRAG:
             G.cards[evt.pay.i3._1].x = evt.pay.i3._2;
@@ -94,13 +126,21 @@ void cb_sim (tml_evt evt) {
 }
 
 void cb_eff (int trv) {
-    SDL_SetRenderDrawColor(REN, 0xFF,0xFF,0xFF,0xFF);
+    SDL_SetRenderDrawColor(REN, 0x34,0x8C,0x31,0xFF);
     SDL_RenderClear(REN);
 
-    SDL_SetRenderDrawColor(REN, 0xFF,0x00,0x00,0xFF);
-    for (int i=0; i<CARDS; i++) {
-        SDL_Rect r = { G.cards[i].x, G.cards[i].y, CARDW, CARDH };
+    SDL_SetRenderDrawColor(REN, 0xFF,0xFF,0xFF,0xFF);
+    for (int i=CARDS-1; i>=0; i--) {
+        Card c = G.cards[i];
+        SDL_Rect r = { c.x, c.y, CARDW, CARDH };
         SDL_RenderFillRect(REN, &r);
+        int w,h;
+        SDL_QueryTexture(txts[c.n], NULL, NULL, &w, &h);
+        r.x += (r.w-w)/2;
+        r.y += (r.h-h)/2;
+        r.w = w;
+        r.h = h;
+        SDL_RenderCopy(REN, txts[c.n], NULL, &r);
     }
 
     if (trv) {
