@@ -2,8 +2,8 @@
 
 TML is a Time Machine Library for SDL.
 
-The programmer can specify points in time to travel back and forth, and then
-resume the simulation from there.
+The library user can programmatically specify a point in time to travel, and
+then resume the simulation from there.
 
 <p align="middle">
     <kbd> <img src="jump.gif"  width="250"> </kbd>
@@ -29,12 +29,16 @@ severe limitations in the programming API:
 - No stateful calls are allowed (e.g., `rand`, `fopen`, etc).
 - All memory state must be static and/or preallocated.
 
+<!--
+- no `fopen`, no threads, no sockets, no `malloc`, no `rand` (use `rand_r`)
+-->
+
 # Examples
 
-- [jump.c]
+- [jump.c](jump.c)
     - `UP`: jump
     - `LEFT`: go back in time
-- [cards.c]
+- [cards.c](cards.c)
     - `DRAG`: move cards
     - `ESC`: switch mode
         - use media controls to time travel
