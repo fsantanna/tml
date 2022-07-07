@@ -33,7 +33,7 @@ typedef struct {
 
 void tml_loop (
     int fps,                                // desired frame rate
-    int men_n,                              // memory size in bytes
+    int mem_n,                              // memory size in bytes
     void* mem_buf,                          // pointer to memory contents
     void (*cb_sim) (tml_evt),               // simulation callback
     void (*cb_eff) (int trv),               // effects callback

@@ -99,8 +99,7 @@ int main (void) {
     SDL_Quit();
 }
 
-// https://stackoverflow.com/a/6127606
-void shuffle (void) {
+void shuffle (void) {                   // https://stackoverflow.com/a/6127606
     for (int i=0; i<CARDS-1; i++) {
         int j = i + rand_r(&G.seed) / (RAND_MAX / (CARDS - i) + 1);
         Card t = G.cards[j];
