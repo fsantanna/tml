@@ -5,8 +5,10 @@ TML is a Time Machine Library for SDL.
 The programmer can specify points in time to travel back and forth and resume
 the simulation from there.
 
-<img src="jump.gif" width="250">
-<img src="cards.gif" width="250">
+<p align="middle">
+    <img border="1" src="jump.gif" width="250">
+    <img border="1" src="cards.gif" width="250">
+</p>
 
 Simulations have two modes, which the programmer controls through the API:
 
