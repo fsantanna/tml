@@ -160,6 +160,7 @@ int cb_rec (SDL_Event* sdl, tml_evt* evt) {
         case SDL_KEYDOWN: {
             int key = sdl->key.keysym.sym;
             if (key == SDLK_ESCAPE) {
+                drag_is = 0;
                 return TML_RET_TRV;
             }
             break;
