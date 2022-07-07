@@ -6,6 +6,7 @@ The programmer can specify points in time to travel back and forth and resume
 the simulation from there.
 
 <img src="jump.gif" width="250">
+<img src="cards.gif" width="250">
 
 Simulations have two modes, which the programmer controls through the API:
 
