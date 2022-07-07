@@ -29,7 +29,25 @@ severe limitations in the programming API:
 - No stateful calls are allowed (e.g., `rand`, `fopen`, etc).
 - All memory state must be static and/or preallocated.
 
-# Usage
+# Examples
+
+- [jump.c]
+    - `UP`: jump
+    - `LEFT`: go back in time
+- [cards.c]
+    - `DRAG`: move cards
+    - `ESC`: switch mode
+        - use media controls to time travel
+
+Compile as follows:
+
+```
+$ chmod +x jump.c
+$ ./jump.c
+$ ./xjump
+```
+
+# Simulation Structure
 
 The programmer specifies a memory block, 4 callbacks, and then calls `tml_loop`
 to pass control to the library:
@@ -76,7 +94,7 @@ int main (void) {
 
 # API
 
-- TML Loop:
+- Loop call:
 
 ```
 void tml_loop (
@@ -105,8 +123,8 @@ enum {
 
 ```
 enum {
-    TML_EVT_INIT = 0,   // initialization event, reset simulation memory
-    TML_EVT_TICK,       // tick event every 1/fps
+    TML_EVT_INIT = 0,   // initialization event (cb_sim must reset memory)
+    TML_EVT_TICK,       // tick event generated every 1/fps
     TML_EVT_NEXT        // reserved for user-defined events
 };
 ```
@@ -120,7 +138,7 @@ enum {
 };
 ```
 
-- TML event type:
+- Event data type:
 
 ```
 typedef struct {
