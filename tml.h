@@ -20,14 +20,14 @@ typedef struct {
         int tick;
         int i1;
         struct {
-            int _1;
-            int _2;
+            int _1,_2;
         } i2;
         struct {
-            int _1;
-            int _2;
-            int _3;
+            int _1,_2,_3;
         } i3;
+        struct {
+            int _1,_2,_3,_4;
+        } i4;
     } pay;
 } tml_evt;
 

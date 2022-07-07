@@ -137,7 +137,7 @@ int cb_rec (SDL_Event* sdl, tml_evt* evt) {
     return TML_RET_NONE;
 }
 
-int  cb_trv (SDL_Event* sdl, int max, int cur, int* ret) {
+int cb_trv (SDL_Event* sdl, int max, int cur, int* ret) {
     if (G.dead) {
         cur = MIN(cur,G.dead);
     }
