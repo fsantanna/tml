@@ -120,6 +120,8 @@ void cb_eff (int trv) {
 }
 
 int cb_rec (SDL_Event* sdl, tml_evt* evt) {
+    if (sdl == NULL) return TML_RET_NONE;
+
     static int drag_is = 0;
     static int drag_i;
     static Pico_2i drag_src;

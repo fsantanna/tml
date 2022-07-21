@@ -76,7 +76,7 @@ void cb_eff (int trv) {
 
 // Record mode callback
 int cb_rec (SDL_Event* sdl, tml_evt* evt) {
-    ...     // given an SDL event, transform to a TML event
+    ...     // given an SDL (or NULL) event, transform to a TML event
     ...     // returns status to quit, switch mode, or continue
     ...     // (e.g., receives SDL_KEYDOWN, returns TML_EVT_JUMP)
 }
