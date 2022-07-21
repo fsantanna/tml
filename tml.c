@@ -54,15 +54,12 @@ _RET_REC_: {
                     //printf("<<< memcpy %d\n", S.tick);
                 }
                 cb_eff(0);
-            }
-
-            // cb_rec
-            {
+            } else {
                 SDL_Event sdl;
                 tml_evt   evt;
-                SDL_Event* ptr = SDL_PollEvent(&sdl) ? &sdl : NULL;
+                assert(SDL_PollEvent(&sdl));
 
-                switch (cb_rec(ptr, &evt)) {
+                switch (cb_rec(&sdl, &evt)) {
                     case TML_RET_NONE:
                         break;
                     case TML_RET_QUIT:

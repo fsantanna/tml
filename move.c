@@ -86,8 +86,6 @@ void cb_eff (int trv) {
 }
 
 int cb_rec (SDL_Event* sdl, tml_evt* evt) {
-    if (sdl == NULL) return TML_RET_NONE;
-
     switch (sdl->type) {
         case SDL_QUIT:
             return TML_RET_QUIT;
